@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import type { ChangePasswordReq, LoginReq } from '../../shared/types'
+import type { ChangePasswordReq, LoginLogRecord, LoginReq, MeResp } from '../../shared/types'
 import { ErrCode } from '../../shared/types'
 import {
   authRequired,
@@ -13,18 +13,39 @@ import { ensureAdminBootstrap, type AdminCredentials } from '../lib/bootstrap'
 import { hashPassword, verifyPassword } from '../lib/crypto'
 import { setSettingValue } from '../lib/db'
 import { fail, ok } from '../lib/response'
-import { createSession } from '../lib/session'
+import { createSession, getSessionTtlSeconds } from '../lib/session'
+export { getSessionTtlSeconds } from '../lib/session'
 import { revokeSession } from '../lib/sessionRevocation'
 import type { HonoEnv } from '../types'
 
 const ADMIN_PASSWORD_KEY = 'admin_password'
 const MIN_PASSWORD_LENGTH = 8
 const MAX_PASSWORD_LENGTH = 256
-
-export { getSessionTtlSeconds } from '../lib/session'
+const LOGIN_LOG_KEY = 'login_log'
 
 export function isValidNewPassword(value: unknown): value is string {
   return typeof value === 'string' && value.length >= MIN_PASSWORD_LENGTH && value.length <= MAX_PASSWORD_LENGTH
+}
+
+async function recordLoginLog(env: HonoEnv['Bindings'], ip: string | null, userAgent: string | null): Promise<void> {
+  if (!env.SESSION) return
+  const record: LoginLogRecord = { ip, at: Date.now(), user_agent: userAgent }
+  try {
+    await env.SESSION.put(LOGIN_LOG_KEY, JSON.stringify(record), { expirationTtl: 90 * 24 * 60 * 60 })
+  } catch {
+    // 登录记录写入失败不阻塞登录
+  }
+}
+
+async function readLoginLog(env: HonoEnv['Bindings']): Promise<LoginLogRecord | null> {
+  if (!env.SESSION) return null
+  try {
+    const raw = await env.SESSION.get(LOGIN_LOG_KEY)
+    if (!raw) return null
+    return JSON.parse(raw) as LoginLogRecord
+  } catch {
+    return null
+  }
 }
 
 export const authRoutes = new Hono<HonoEnv>()
@@ -68,7 +89,8 @@ authRoutes.post('/login', loginRateLimit, async (c) => {
   const loginFailurePromise = loginRateLimitState
     ? clearLoginFailures(c.env, ip)
     : Promise.resolve()
-  const [data] = await Promise.all([sessionPromise, loginFailurePromise])
+  const loginLogPromise = recordLoginLog(c.env, ip, c.req.header('User-Agent') ?? null)
+  const [data] = await Promise.all([sessionPromise, loginFailurePromise, loginLogPromise])
   return c.json(ok(data))
 })
 
@@ -128,8 +150,22 @@ authRoutes.post('/password', authRequired, async (c) => {
   }
 })
 
-authRoutes.get('/me', authRequired, (c) => {
-  return c.json(ok({ username: c.get('username') }))
+authRoutes.post('/logout-all', authRequired, async (c) => {
+  await clearAllSessions(c.env)
+  clearAllCachedSessions()
+  return c.json(ok(null))
+})
+
+authRoutes.get('/me', authRequired, async (c) => {
+  const log = await readLoginLog(c.env)
+  const me: MeResp = {
+    username: c.get('username'),
+    expires_at: c.get('sessionExpiresAt'),
+    last_login_at: log?.at ?? null,
+    last_login_ip: log?.ip ?? null,
+    session_ttl_seconds: getSessionTtlSeconds(c.env.SESSION_TTL),
+  }
+  return c.json(ok(me))
 })
 
 export default authRoutes

@@ -13,16 +13,28 @@
 
 const ALLOWED_PROTOCOLS = new Set(['http:', 'https:'])
 
+// 站内上传文件的本地路径前缀（/api/file/:id/content）。
+// 书签允许指向本 Worker 自身上传的文件（图片/APK/文档），URL 解析器无法为
+// 相对路径补全协议，因此在此显式放行。该路径只指向本站 uploads 表，不构成
+// 任意 URL 跳转面。
+const LOCAL_FILE_PREFIX = '/api/file/'
+
+export function isAllowedBookmarkUrl(value: unknown): value is string {
+  return parseAllowedUrl(value) !== null || isLocalFileUrl(value)
+}
+
+function isLocalFileUrl(value: unknown): boolean {
+  if (typeof value !== 'string') return false
+  const trimmed = value.trim()
+  return trimmed.startsWith(LOCAL_FILE_PREFIX) && /^\/api\/file\/\d+\/content(?:\?.*)?$/.test(trimmed)
+}
+
 // URL 规范里的 scheme：字母开头，后跟字母/数字/`+`/`-`/`.`，以 `:` 结束。
 const HAS_SCHEME = /^[a-zA-Z][a-zA-Z0-9+.-]*:/
 // `host:port` 与 `scheme:path` 在语法上无法区分（`localhost:8080` 两边都成立）。
 // 冒号后面全是数字时按主机端口理解——自建服务的书签常写成这样，按 scheme 处理
 // 会把它们当成非法协议丢掉。
 const LOOKS_LIKE_HOST_PORT = /^[^:/?#\s]+:\d+(?:[/?#]|$)/
-
-export function isAllowedBookmarkUrl(value: unknown): value is string {
-  return parseAllowedUrl(value) !== null
-}
 
 function parseAllowedUrl(value: unknown): URL | null {
   if (typeof value !== 'string') return null

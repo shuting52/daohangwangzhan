@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy } from 'svelte'
   import type { IconifyCandidate as IconifySearchCandidate } from '../../shared/types'
-  import { getErrorMessage, iconifyApi } from '../lib/api'
+  import { getErrorMessage, iconifyApi, uploadsApi } from '../lib/api'
   import type { CategoryFormValue } from '../lib/adminTypes'
   import {
     createBookmarkIconifySearchState,
@@ -175,6 +175,34 @@
     iconifyError = ''
   }
 
+  let iconFileInput: HTMLInputElement | null = null
+  let uploadingIcon = false
+  let iconUploadError = ''
+
+  function openIconFilePicker() {
+    iconUploadError = ''
+    iconFileInput?.click()
+  }
+
+  async function handleIconFileSelected(event: Event) {
+    const input = event.currentTarget as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = ''
+    if (!file) return
+    uploadingIcon = true
+    iconUploadError = ''
+    try {
+      const uploaded = await uploadsApi.upload(file)
+      form.icon = uploadsApi.contentUrl(uploaded.id)
+      iconifyName = ''
+      iconifyUseConfirmed = false
+    } catch (error) {
+      iconUploadError = getErrorMessage(error) || '图标上传失败，请重试'
+    } finally {
+      uploadingIcon = false
+    }
+  }
+
   async function handleSubmit() {
     await onSubmit?.({
       ...form,
@@ -230,6 +258,15 @@
           <span>图标</span>
           <div class="icon-row">
             <input bind:value={form.icon} type="text" placeholder="例如：🧰 或 icon-tools" on:input={syncManualIconInput} />
+            <button
+              type="button"
+              class="ghost-button upload-button"
+              on:click={openIconFilePicker}
+              disabled={loading || uploadingIcon}
+              title="上传本地文件作为图标（不限制文件大小）"
+            >
+              {uploadingIcon ? '上传中…' : '本地上传'}
+            </button>
             {#if imageHostUrl}
               <button
                 type="button"
@@ -242,6 +279,19 @@
               </button>
             {/if}
           </div>
+          {#if iconUploadError}
+            <small class="field-error">{iconUploadError}</small>
+          {/if}
+          <small>支持本地上传，不限制文件大小；建议使用图片（png/jpg/webp/svg/gif）。</small>
+          <input
+            bind:this={iconFileInput}
+            type="file"
+            accept="*"
+            style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;"
+            tabindex="-1"
+            aria-hidden="true"
+            on:change={handleIconFileSelected}
+          />
         </label>
 
         <label class="visibility-toggle">
@@ -414,15 +464,24 @@
     display: flex;
     gap: 8px;
     align-items: center;
+    flex-wrap: wrap;
   }
 
   .icon-row input {
     flex: 1 1 auto;
+    min-width: 0;
   }
 
   .upload-button {
     flex: 0 0 auto;
     white-space: nowrap;
+  }
+
+  .field-error {
+    margin: 0;
+    color: #dc2626;
+    font-size: 12px;
+    line-height: 1.35;
   }
 
   .modal-actions {

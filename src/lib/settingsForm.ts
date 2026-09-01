@@ -114,7 +114,7 @@ export const emptySettingsForm: SettingsFormModel = {
   search_box_show: true,
   search_engine_selector_show: true,
   content_layout: { max_width: 1200, max_width_unit: 'px', margin_x: 0, margin_top: 0, margin_bottom: 0 },
-  navigation: { position: 'left', always_expanded: false, top_layout: 'scroll' },
+  navigation: { position: 'left', always_expanded: false, top_layout: 'scroll', show_icons: true, show_counts: true, show_site_name: true, nav_font_size: 14, nav_icon_size: 20, hide_empty_categories: false },
   footer_html: '',
   most_visited_count: 8,
   site_title_show: true,
@@ -274,6 +274,12 @@ export function createSettingsFormState(
       position: navigation?.position === 'top' ? 'top' : 'left',
       always_expanded: navigation?.always_expanded ?? false,
       top_layout: navigation?.top_layout === 'wrap' ? 'wrap' : 'scroll',
+      show_icons: navigation?.show_icons ?? true,
+      show_counts: navigation?.show_counts ?? true,
+      show_site_name: navigation?.show_site_name ?? true,
+      nav_font_size: navigation?.nav_font_size ?? 14,
+      nav_icon_size: navigation?.nav_icon_size ?? 20,
+      hide_empty_categories: navigation?.hide_empty_categories ?? false,
     },
     footer_html: source?.footer_html ?? '',
     most_visited_count: typeof source?.most_visited_count === 'number' ? source.most_visited_count : 8,
@@ -370,6 +376,12 @@ export function normalizeSettingsForm(source: SettingsFormModel): SettingsFormMo
       position: source.navigation.position === 'top' ? 'top' : 'left',
       always_expanded: Boolean(source.navigation.always_expanded),
       top_layout: source.navigation.top_layout === 'wrap' ? 'wrap' : 'scroll',
+      show_icons: source.navigation.show_icons ?? true,
+      show_counts: source.navigation.show_counts ?? true,
+      show_site_name: source.navigation.show_site_name ?? true,
+      nav_font_size: source.navigation.nav_font_size ?? 14,
+      nav_icon_size: source.navigation.nav_icon_size ?? 20,
+      hide_empty_categories: source.navigation.hide_empty_categories ?? false,
     },
     footer_html: source.footer_html.trim(),
     most_visited_count: clampNumber(source.most_visited_count, 0, 20),
@@ -533,6 +545,16 @@ export function applyThemeTemplate(
   next.card_text_color = tpl.card_text_color
   if (template.marquee) {
     next.marquee = { ...next.marquee, ...template.marquee }
+  }
+  if (template.customCss) {
+    next.custom_css = [next.custom_css.trim(), `\n/* ===== 模板 ${template.name} 注入 ===== */\n${template.customCss}`]
+      .filter(Boolean)
+      .join('\n')
+  }
+  if (template.customJs) {
+    next.custom_js = [next.custom_js.trim(), `\n/* ===== 模板 ${template.name} 注入 ===== */\n${template.customJs}`]
+      .filter(Boolean)
+      .join('\n')
   }
   return next
 }

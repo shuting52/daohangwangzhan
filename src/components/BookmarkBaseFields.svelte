@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { getErrorMessage, uploadsApi } from '../lib/api'
   import type { BookmarkFormValue } from '../lib/adminTypes'
   import type { CategoryTreeOption } from '../lib/categorySelect'
   import CategoryTreeSelect from './CategoryTreeSelect.svelte'
@@ -14,6 +15,37 @@
   export let loading = false
   export let titleLoading = false
   export let onUrlBlur: (() => void) | undefined = undefined
+  export let onLocalFileUploaded:
+    | ((file: { url: string; title: string; isImage: boolean }) => void | Promise<void>)
+    | undefined = undefined
+
+  let fileInput: HTMLInputElement | null = null
+  let uploadingFile = false
+  let uploadError = ''
+
+  function openFilePicker(): void {
+    uploadError = ''
+    fileInput?.click()
+  }
+
+  async function handleFileSelected(event: Event): Promise<void> {
+    const input = event.currentTarget as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = ''
+    if (!file) return
+    uploadingFile = true
+    uploadError = ''
+    try {
+      const uploaded = await uploadsApi.upload(file)
+      const isImage = file.type.startsWith('image/')
+      const baseName = file.name.replace(/\.[^.]+$/, '')
+      await onLocalFileUploaded?.({ url: uploadsApi.contentUrl(uploaded.id), title: baseName || file.name, isImage })
+    } catch (error) {
+      uploadError = getErrorMessage(error) || '文件上传失败，请重试'
+    } finally {
+      uploadingFile = false
+    }
+  }
 </script>
 
 <div class="field-compact field-label">
@@ -38,12 +70,36 @@
 
 <label class="field-compact">
   <span>链接地址</span>
+  <div class="url-row">
+    <input
+      bind:value={url}
+      type="url"
+      placeholder="https://example.com"
+      required
+      on:blur={() => onUrlBlur?.()}
+    />
+    <button
+      type="button"
+      class="local-file-button"
+      on:click={openFilePicker}
+      disabled={loading || uploadingFile}
+      title="上传本地文件作为书签（支持任意文件，包括 APK）"
+    >
+      {uploadingFile ? '上传中…' : '上传本地文件'}
+    </button>
+  </div>
+  {#if uploadError}
+    <small class="field-error">{uploadError}</small>
+  {/if}
+  <small>支持任意文件（图片/APK/文档等），上传后可下载或打开；图片会自动用作书签图标。</small>
   <input
-    bind:value={url}
-    type="url"
-    placeholder="https://example.com"
-    required
-    on:blur={() => onUrlBlur?.()}
+    bind:this={fileInput}
+    type="file"
+    accept="*"
+    style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;"
+    tabindex="-1"
+    aria-hidden="true"
+    on:change={handleFileSelected}
   />
 </label>
 
@@ -165,9 +221,55 @@
     --select-hover-border: #94a3b8;
   }
 
+  .url-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .url-row input {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .local-file-button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #0f172a;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 7px 12px;
+    transition: var(--transition-base);
+  }
+
+  .local-file-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .local-file-button:hover:not(:disabled) {
+    border-color: #2563eb;
+    color: #2563eb;
+  }
+
+  .field-error {
+    margin: 0;
+    color: #dc2626;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
   @media (max-width: 500px) {
     .field-compact {
       grid-column: 1 / -1;
+    }
+
+    .url-row {
+      grid-template-columns: 1fr;
     }
   }
 </style>

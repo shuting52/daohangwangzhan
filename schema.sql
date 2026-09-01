@@ -81,7 +81,7 @@ INSERT OR IGNORE INTO settings (key, value) VALUES
   ('search_box_show', 'true'),
   ('search_engine_selector_show', 'true'),
   ('content_layout', '{"max_width":1200,"max_width_unit":"px","margin_x":0,"margin_top":0,"margin_bottom":0}'),
-  ('navigation', '{"position":"left","always_expanded":false,"top_layout":"scroll"}'),
+  ('navigation', '{"position":"left","always_expanded":false,"top_layout":"scroll","show_icons":true,"show_counts":true,"show_site_name":true,"nav_font_size":14,"nav_icon_size":20,"hide_empty_categories":false}'),
   ('footer_html', '""'),
   ('custom_themes', '[]');
 

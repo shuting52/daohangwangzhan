@@ -108,7 +108,7 @@ export interface MarqueeSetting {
 }
 
 // 内置外观主题模板 ID
-export type ThemePresetId = 'neo-brutalism' | 'bouncy' | 'cute-cartoon' | 'new-year' | 'neumorphism' | 'frosted'
+export type ThemePresetId = 'neo-brutalism' | 'bouncy' | 'cute-cartoon' | 'new-year' | 'neumorphism' | 'frosted' | 'small-yuer'
 
 // 外观主题模板
 export interface ThemeTemplate {
@@ -133,6 +133,9 @@ export interface ThemeTemplate {
     site_title_effect: SiteTitleEffect
   }
   marquee?: Partial<Omit<MarqueeSetting, 'enabled' | 'text'>>
+  // 模板附带的 CSS/JS，选中模板时写入 custom_css/custom_js（可后续继续修改）
+  customCss?: string
+  customJs?: string
 }
 
 export interface SearchEngine {
@@ -163,6 +166,18 @@ export interface NavigationSetting {
   position: 'left' | 'top'
   always_expanded: boolean
   top_layout: 'scroll' | 'wrap'
+  // 导航中显示分类图标
+  show_icons: boolean
+  // 导航中显示书签数量
+  show_counts: boolean
+  // 侧边导航显示站点标题
+  show_site_name: boolean
+  // 导航字体大小 (px)
+  nav_font_size: number
+  // 导航图标大小 (px)
+  nav_icon_size: number
+  // 隐藏无书签的空分类
+  hide_empty_categories: boolean
 }
 
 // 自定义主题（主题随心换）
@@ -304,6 +319,22 @@ export interface InstallReq {
 export interface ChangePasswordReq {
   current_password: string
   new_password: string
+}
+
+// GET /api/auth/me
+export interface MeResp {
+  username: string
+  expires_at: number
+  last_login_at: number | null
+  last_login_ip: string | null
+  session_ttl_seconds: number
+}
+
+// 最近登录记录（存 SESSION KV：LOGIN_LOG_KEY）
+export interface LoginLogRecord {
+  ip: string | null
+  at: number
+  user_agent: string | null
 }
 
 // GET /api/public/data  （公开只读聚合）

@@ -52,7 +52,8 @@ describe('api client surface', () => {
     // 服务端路由仍然保留（文档化契约 + scripts/smoke-test.mjs 在用），
     // 只是前端改由 /api/admin/data 和 /api/public/data 聚合获取。
     expect(api).not.toHaveProperty('config')
-    expect(api.auth).not.toHaveProperty('me')
+    // me 由「账号安全」功能新增：登录用户可查看当前账号信息
+    expect(api.auth).toHaveProperty('me')
     expect(api.categories).not.toHaveProperty('list')
     expect(api.bookmarks).not.toHaveProperty('list')
     expect(api.settings).not.toHaveProperty('get')

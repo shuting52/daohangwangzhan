@@ -192,6 +192,16 @@
     void loadSiteTitle(result.task.url, result.task.requestId)
   }
 
+  function handleLocalFileUploaded(file: { url: string; title: string; isImage: boolean }) {
+    form.url = file.url
+    form.title = file.title || form.title
+    if (file.isImage) {
+      // 图片文件自动作为书签图标
+      form.icon_source = 'custom'
+      form.icon = file.url
+    }
+  }
+
   async function loadSiteTitle(url: string, requestId: number) {
     try {
       const meta = await api.bookmarks.fetchSiteMeta(url)
@@ -348,6 +358,7 @@
           {loading}
           titleLoading={titleLookupState.loading}
           onUrlBlur={handleUrlBlur}
+          onLocalFileUploaded={handleLocalFileUploaded}
         />
 
         <BookmarkIconCandidatePicker

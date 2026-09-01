@@ -14,9 +14,10 @@
 
   $: effect = settings?.site_title_effect ?? 'none'
 
-  // 打字机效果状态
+  // 打字机效果状态（持续循环：打字 → 停顿 → 删除 → 停顿 → 重新打字）
   let typingText = pageTitle
   let typingTimer: ReturnType<typeof setInterval> | null = null
+  let typingTimeout: ReturnType<typeof setTimeout> | null = null
   let typingStarted = false
 
   $: if (effect === 'typing' && !typingStarted && typeof window !== 'undefined') {
@@ -24,23 +25,44 @@
     startTyping()
   }
 
+  function stopTypingTimers(): void {
+    if (typingTimer) clearInterval(typingTimer)
+    if (typingTimeout) clearTimeout(typingTimeout)
+    typingTimer = null
+    typingTimeout = null
+  }
+
   function startTyping(): void {
     const full = pageTitle
     let index = 0
-    typingText = ''
-    if (typingTimer) clearInterval(typingTimer)
+    let deleting = false
+    stopTypingTimers()
     typingTimer = setInterval(() => {
-      index += 1
-      typingText = full.slice(0, index)
-      if (index >= full.length && typingTimer) {
-        clearInterval(typingTimer)
-        typingTimer = null
+      if (!deleting) {
+        index += 1
+        typingText = full.slice(0, index)
+        if (index >= full.length) {
+          // 打字完成后停顿 1.6 秒，再进入删除阶段
+          stopTypingTimers()
+          typingTimeout = setTimeout(() => {
+            deleting = true
+            typingTimer = setInterval(() => {
+              index -= 1
+              typingText = full.slice(0, index)
+              if (index <= 0) {
+                // 删除完成后停顿 0.6 秒，重新开始打字
+                stopTypingTimers()
+                typingTimeout = setTimeout(startTyping, 600)
+              }
+            }, 60)
+          }, 1600)
+        }
       }
     }, 120)
   }
 
   onDestroy(() => {
-    if (typingTimer) clearInterval(typingTimer)
+    stopTypingTimers()
   })
 </script>
 

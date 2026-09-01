@@ -81,6 +81,14 @@
   $: allCategoryBookmarks = groupBookmarksByCategory(sortedBookmarks)
   $: displayCategoryBookmarks = homeSortMode ? groupBookmarksByCategory(homeSortDraft) : allCategoryBookmarks
   $: navigationSections = getHomeSections(categoryForest, allCategoryBookmarks)
+  $: navigationSections = navigation?.hide_empty_categories
+    ? navigationSections
+        .map((section) => ({
+          ...section,
+          children: (section.children ?? []).filter((child) => (child.count ?? 0) > 0 || (child.children?.length ?? 0) > 0),
+        }))
+        .filter((section) => (section.count ?? 0) > 0 || (section.children?.length ?? 0) > 0)
+    : navigationSections
   $: categoryGroups = getHomeCategoryGroups(categoryForest, selectedCategoryIds)
   $: activeId = resolveHomeActiveSectionId(navigationSections, activeId)
 
@@ -417,6 +425,12 @@
           {#if marqueeDate}<span class="marquee-date">{marqueeDate}</span>{/if}
           <span class="marquee-text">{marqueeText}</span>
         </span>
+        {#if marqueeEffect === 'slide'}
+          <span class="marquee-content" aria-hidden="true">
+            {#if marqueeDate}<span class="marquee-date">{marqueeDate}</span>{/if}
+            <span class="marquee-text">{marqueeText}</span>
+          </span>
+        {/if}
       </span>
     </div>
   {/if}
@@ -445,6 +459,7 @@
     items={navigationSections}
     {activeId}
     {navigation}
+    siteName={pageTitle}
     onNavigate={handleNavigate}
     onPersistentExpansionChange={(expanded) => (persistentLeftExpanded = expanded)}
     onTopNavHeightChange={(height) => (topNavHeight = height)}

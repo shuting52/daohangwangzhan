@@ -21,6 +21,7 @@
   export let items: NavigationItem[] = []
   export let activeId: string | number | null = null
   export let navigation: NavigationSetting = { position: 'left', always_expanded: false, top_layout: 'scroll' }
+  export let siteName = ''
   export let onNavigate: ((id: string | number) => void) | undefined = undefined
   export let onPersistentExpansionChange: ((expanded: boolean) => void) | undefined = undefined
   export let onTopNavHeightChange: ((height: number) => void) | undefined = undefined
@@ -421,7 +422,14 @@
 </script>
 
 {#if isTop}
-  <aside class="top-navigation" class:wrap={isWrap} bind:this={navigationRoot} data-testid="top-navigation" aria-label="分类导航">
+  <aside
+    class="top-navigation"
+    class:wrap={isWrap}
+    bind:this={navigationRoot}
+    data-testid="top-navigation"
+    aria-label="分类导航"
+    style="--nav-font-size: {navigation.nav_font_size ?? 14}px; --nav-icon-size: {navigation.nav_icon_size ?? 22}px;"
+  >
     <button
       type="button"
       class="scroll-arrow scroll-arrow-left"
@@ -455,11 +463,11 @@
             aria-current={String(activeId) === String(item.id) ? 'location' : undefined}
             on:click={() => handleItemClick(item.id)}
           >
-            {#if item.icon}
-              <CategoryIcon category={getCategoryIconValue(item)} size={22} className="top-category-icon" />
+            {#if navigation.show_icons !== false && item.icon}
+              <CategoryIcon category={getCategoryIconValue(item)} size={navigation.nav_icon_size ?? 22} className="top-category-icon" />
             {/if}
             <span>{item.title}</span>
-            {#if item.count != null}<small>{item.count}</small>{/if}
+            {#if navigation.show_counts !== false && item.count != null}<small>{item.count}</small>{/if}
           </button>
           {#if item.children?.length}
             <button
@@ -509,12 +517,12 @@
               on:click={() => handleItemClick(child.id)}
             >
               <span class="top-submenu-title">
-                {#if child.icon}
+                {#if navigation.show_icons !== false && child.icon}
                   <CategoryIcon category={getCategoryIconValue(child)} size={22} className="top-submenu-icon" />
                 {/if}
                 <span>{child.title}</span>
               </span>
-              {#if child.count != null}<small>{child.count}</small>{/if}
+              {#if navigation.show_counts !== false && child.count != null}<small>{child.count}</small>{/if}
             </button>
           {/each}
         </div>
@@ -548,6 +556,7 @@
     on:mouseenter={handleMouseEnter}
     on:mouseleave={handleMouseLeave}
     bind:this={navigationRoot}
+    style="--nav-font-size: {navigation.nav_font_size ?? 14}px; --nav-icon-size: {navigation.nav_icon_size ?? 26}px;"
   >
     {#if isMobileView}
       <button type="button" class="toc-close-btn" on:click={closeMobileSidebar} aria-label="收起目录">‹</button>
@@ -563,6 +572,9 @@
         {isExpanded ? '‹' : '›'}
       </button>
     {/if}
+    {#if navigation.show_site_name !== false && siteName && isExpanded}
+      <div class="toc-site-name" title={siteName}>{siteName}</div>
+    {/if}
 
     <nav class="toc-nav">
       {#each items as item (item.id)}
@@ -576,15 +588,15 @@
               aria-current={String(activeId) === String(item.id) ? 'location' : undefined}
               on:click={() => handleItemClick(item.id)}
             >
-              {#if item.icon}
+              {#if navigation.show_icons !== false && item.icon}
                 <span class="toc-icon-slot">
-                  <CategoryIcon category={getCategoryIconValue(item)} size={26} className="toc-category-icon" />
+                  <CategoryIcon category={getCategoryIconValue(item)} size={navigation.nav_icon_size ?? 26} className="toc-category-icon" />
                 </span>
               {:else}
                 <span class="toc-slip"></span>
               {/if}
               <span class="toc-title">{item.title}</span>
-              {#if item.count != null}<small>{item.count}</small>{/if}
+              {#if navigation.show_counts !== false && item.count != null}<small>{item.count}</small>{/if}
             </button>
             {#if item.children?.length}
               <button
@@ -610,12 +622,12 @@
                   on:click={() => handleItemClick(child.id)}
                 >
                   <span class="toc-child-title">
-                    {#if child.icon}
-                      <CategoryIcon category={getCategoryIconValue(child)} size={21} className="toc-child-icon" />
+                    {#if navigation.show_icons !== false && child.icon}
+                      <CategoryIcon category={getCategoryIconValue(child)} size={(navigation.nav_icon_size ?? 26) - 5} className="toc-child-icon" />
                     {/if}
                     <span>{child.title}</span>
                   </span>
-                  {#if child.count != null}<small>{child.count}</small>{/if}
+                  {#if navigation.show_counts !== false && child.count != null}<small>{child.count}</small>{/if}
                 </button>
               {/each}
             </div>
@@ -769,7 +781,7 @@
     background: transparent;
     color: var(--toc-text);
     font: inherit;
-    font-size: 14px;
+    font-size: var(--nav-font-size, 14px);
     white-space: nowrap;
     cursor: pointer;
   }
@@ -793,9 +805,9 @@
 
   .top-item :global(.top-category-icon),
   .top-submenu-title :global(.top-submenu-icon) {
-    width: 22px;
-    height: 22px;
-    min-width: 22px;
+    width: var(--nav-icon-size, 22px);
+    height: var(--nav-icon-size, 22px);
+    min-width: var(--nav-icon-size, 22px);
     border-radius: 6px;
   }
 
@@ -1116,9 +1128,9 @@
   }
 
   .toc-child-title :global(.toc-child-icon) {
-    width: 21px;
-    height: 21px;
-    min-width: 21px;
+    width: calc(var(--nav-icon-size, 26px) - 5px);
+    height: calc(var(--nav-icon-size, 26px) - 5px);
+    min-width: calc(var(--nav-icon-size, 26px) - 5px);
     border-radius: 6px;
   }
 
@@ -1165,9 +1177,9 @@
   }
 
   .toc-icon-slot :global(.toc-category-icon) {
-    width: 26px;
-    height: 26px;
-    min-width: 26px;
+    width: var(--nav-icon-size, 26px);
+    height: var(--nav-icon-size, 26px);
+    min-width: var(--nav-icon-size, 26px);
     border-radius: 7px;
     transition: border-color var(--transition-base), transform var(--transition-base);
   }
@@ -1197,6 +1209,18 @@
 
   .toc-item.active .toc-title {
     color: var(--toc-accent);
+  }
+
+  .toc-site-name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 4px 10px 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--toc-text);
+    opacity: 0.9;
+    letter-spacing: 0.3px;
   }
 
   @media (max-width: 799px) {

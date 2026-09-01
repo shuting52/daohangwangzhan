@@ -1,5 +1,7 @@
 <script lang="ts">
-  import type { ChangePasswordReq } from '../../shared/types'
+  import { onMount } from 'svelte'
+  import type { ChangePasswordReq, MeResp } from '../../shared/types'
+  import { authApi } from '../lib/api'
 
   type AsyncVoid<T = void> = T | Promise<T>
 
@@ -13,6 +15,11 @@
   let passwordError = ''
   let passwordMessage = ''
 
+  let account: MeResp | null = null
+  let accountError = ''
+  let loggingOutAll = false
+  let logoutAllMessage = ''
+
   $: passwordMismatch = Boolean(confirmPassword) && newPassword !== confirmPassword
   $: canSave =
     Boolean(onChangePassword) &&
@@ -22,6 +29,25 @@
     newPassword.length >= 8 &&
     newPassword.length <= 256 &&
     newPassword === confirmPassword
+
+  function formatTime(timestamp: number | null): string {
+    if (!timestamp) return '暂无记录'
+    const date = new Date(timestamp)
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+  }
+
+  function formatExpires(timestamp: number): string {
+    const date = new Date(timestamp)
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+  }
+
+  onMount(async () => {
+    try {
+      account = await authApi.me()
+    } catch (error) {
+      accountError = error instanceof Error ? error.message : '无法读取账号信息'
+    }
+  })
 
   async function handleChangePassword() {
     if (!canSave || !onChangePassword) {
@@ -48,6 +74,20 @@
     }
   }
 
+  async function handleLogoutAll() {
+    if (loggingOutAll) return
+    loggingOutAll = true
+    logoutAllMessage = ''
+    try {
+      await authApi.logoutAll()
+      logoutAllMessage = '已退出所有设备上的登录。'
+    } catch (error) {
+      logoutAllMessage = `操作失败：${error instanceof Error ? error.message : '请重试'}`
+    } finally {
+      loggingOutAll = false
+    }
+  }
+
   function handlePasswordKeydown(event: KeyboardEvent): void {
     if (event.key !== 'Enter') return
     event.preventDefault()
@@ -57,7 +97,30 @@
 
 <fieldset id="settings-section-account" class="group group-wide" disabled={saving || changingPassword}>
   <legend>账号安全</legend>
-  <p class="group-desc">修改管理员登录密码。此操作独立生效，无需点击底部「保存设置」。</p>
+  <p class="group-desc">管理管理员账号信息与登录密码。密码修改独立生效，无需点击底部「保存设置」。</p>
+
+  <div class="account-card">
+    <div class="account-row">
+      <span class="account-label">登录账号</span>
+      <span class="account-value mono">{account?.username ?? (accountError ? '读取失败' : '加载中…')}</span>
+    </div>
+    <div class="account-row">
+      <span class="account-label">最近登录时间</span>
+      <span class="account-value">{formatTime(account?.last_login_at ?? null)}</span>
+    </div>
+    <div class="account-row">
+      <span class="account-label">最近登录 IP</span>
+      <span class="account-value mono">{account?.last_login_ip ?? '暂无记录'}</span>
+    </div>
+    <div class="account-row">
+      <span class="account-label">会话过期时间</span>
+      <span class="account-value">{account ? formatExpires(account.expires_at) : '—'}</span>
+    </div>
+    {#if accountError}
+      <p class="password-message error" role="alert">{accountError}</p>
+    {/if}
+  </div>
+
   <div class="form-grid password-grid">
     <label class="field">
       <span>当前密码</span>
@@ -114,6 +177,22 @@
       更新密码
     {/if}
   </button>
+
+  <div class="danger-zone">
+    <h3>危险操作</h3>
+    <p>退出所有设备：使所有已登录的会话立即失效（包括当前设备以外的手机、电脑）。</p>
+    {#if logoutAllMessage}
+      <p class="password-message {logoutAllMessage.startsWith('操作失败') ? 'error' : 'ok'}">{logoutAllMessage}</p>
+    {/if}
+    <button
+      type="button"
+      class="ghost-button danger-button"
+      on:click={handleLogoutAll}
+      disabled={saving || loggingOutAll}
+    >
+      {loggingOutAll ? '操作中…' : '退出所有设备'}
+    </button>
+  </div>
 </fieldset>
 
 <style>
@@ -201,6 +280,69 @@
 
   .password-save-button {
     justify-self: start;
+  }
+
+  .account-card {
+    display: grid;
+    gap: 6px;
+    border: 1px solid var(--sp-input-border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    background: var(--sp-input-bg);
+  }
+
+  .account-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .account-label {
+    color: var(--sp-muted);
+    flex: 0 0 auto;
+  }
+
+  .account-value {
+    color: var(--sp-text);
+    font-weight: 600;
+    text-align: right;
+    word-break: break-all;
+  }
+
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px;
+  }
+
+  .danger-zone {
+    display: grid;
+    gap: 8px;
+    margin-top: 4px;
+    border: 1px dashed var(--sp-danger-border, rgba(220, 38, 38, 0.4));
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+
+  .danger-zone h3 {
+    margin: 0;
+    font-size: 14px;
+    color: var(--sp-danger, #dc2626);
+  }
+
+  .danger-zone p {
+    margin: 0;
+    color: var(--sp-muted);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .danger-button {
+    justify-self: start;
+    color: var(--sp-danger, #dc2626);
+    border-color: var(--sp-danger-border, rgba(220, 38, 38, 0.4));
   }
 
   .ghost-button {

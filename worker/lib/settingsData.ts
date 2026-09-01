@@ -89,6 +89,12 @@ export const DEFAULT_SETTINGS: Settings = {
     position: 'left',
     always_expanded: false,
     top_layout: 'scroll',
+    show_icons: true,
+    show_counts: true,
+    show_site_name: true,
+    nav_font_size: 14,
+    nav_icon_size: 20,
+    hide_empty_categories: false,
   },
   footer_html: '',
   most_visited_count: 8,
@@ -166,6 +172,12 @@ function normalizeNavigationSetting(value: unknown): Settings['navigation'] {
     position: value.position,
     always_expanded: value.always_expanded,
     top_layout: value.top_layout,
+    show_icons: value.show_icons ?? true,
+    show_counts: value.show_counts ?? true,
+    show_site_name: value.show_site_name ?? true,
+    nav_font_size: typeof value.nav_font_size === 'number' && value.nav_font_size > 0 ? value.nav_font_size : 14,
+    nav_icon_size: typeof value.nav_icon_size === 'number' && value.nav_icon_size > 0 ? value.nav_icon_size : 20,
+    hide_empty_categories: typeof value.hide_empty_categories === 'boolean' ? value.hide_empty_categories : false,
   }
 }
 

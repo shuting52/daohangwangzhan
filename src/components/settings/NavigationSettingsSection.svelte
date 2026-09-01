@@ -27,6 +27,14 @@
     form.navigation.top_layout = value ? 'wrap' : 'scroll'
     void syncForm()
   }
+
+  function setNavigationFlag(
+    key: 'show_icons' | 'show_counts' | 'show_site_name' | 'hide_empty_categories',
+    value: boolean,
+  ): void {
+    form.navigation[key] = value
+    void syncForm()
+  }
 </script>
 
 <fieldset id="settings-section-layout" class="group group-wide" disabled={saving}>
@@ -84,6 +92,89 @@
           ariaLabel="顶部分类分行显示"
           on:change={(event) => setTopLayout(event.detail)}
         />
+      </div>
+
+      <div class="nav-switch-row">
+        <span class="nav-switch-copy">
+          显示分类图标
+          <Tooltip text="在导航中显示分类图标，关闭后导航更简洁。" />
+        </span>
+        <Switch
+          checked={form.navigation.show_icons !== false}
+          disabled={saving}
+          ariaLabel="导航显示分类图标"
+          on:change={(event) => setNavigationFlag('show_icons', event.detail)}
+        />
+      </div>
+
+      <div class="nav-switch-row">
+        <span class="nav-switch-copy">
+          显示书签数量
+          <Tooltip text="在分类名称旁显示该书签数量。" />
+        </span>
+        <Switch
+          checked={form.navigation.show_counts !== false}
+          disabled={saving}
+          ariaLabel="导航显示书签数量"
+          on:change={(event) => setNavigationFlag('show_counts', event.detail)}
+        />
+      </div>
+
+      <div class="nav-switch-row">
+        <span class="nav-switch-copy">
+          侧边导航显示站点标题
+          <Tooltip text="左侧导航展开时在顶部显示站点名称。" />
+        </span>
+        <Switch
+          checked={form.navigation.show_site_name !== false}
+          disabled={saving}
+          ariaLabel="侧边导航显示站点标题"
+          on:change={(event) => setNavigationFlag('show_site_name', event.detail)}
+        />
+      </div>
+
+      <div class="nav-switch-row">
+        <span class="nav-switch-copy">
+          隐藏空分类
+          <Tooltip text="没有书签的分类不在导航中显示，让导航更干净。" />
+        </span>
+        <Switch
+          checked={form.navigation.hide_empty_categories === true}
+          disabled={saving}
+          ariaLabel="隐藏空分类"
+          on:change={(event) => setNavigationFlag('hide_empty_categories', event.detail)}
+        />
+      </div>
+
+      <div class="nav-size-grid">
+        <label class="field field-number" for="settings-nav-font-size">
+          <span>导航字体大小</span>
+          <InputGroup
+            inputId="settings-nav-font-size"
+            type="number"
+            min={12}
+            max={28}
+            step={1}
+            suffixUnit="px"
+            bind:value={form.navigation.nav_font_size}
+            ariaLabel="导航字体大小"
+            on:input={() => void syncForm()}
+          />
+        </label>
+        <label class="field field-number" for="settings-nav-icon-size">
+          <span>导航图标大小</span>
+          <InputGroup
+            inputId="settings-nav-icon-size"
+            type="number"
+            min={14}
+            max={48}
+            step={1}
+            suffixUnit="px"
+            bind:value={form.navigation.nav_icon_size}
+            ariaLabel="导航图标大小"
+            on:input={() => void syncForm()}
+          />
+        </label>
       </div>
     </div>
   </div>
@@ -185,6 +276,17 @@
     color: var(--sp-label);
     font-size: 14px;
     font-weight: 600;
+  }
+
+  .nav-size-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .nav-size-grid .field-number {
+    grid-column: span 1;
   }
 
   .field-size,

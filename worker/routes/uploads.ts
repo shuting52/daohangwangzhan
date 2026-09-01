@@ -1,30 +1,34 @@
-// 文件上传与文件管理（md/图片/视频）
+// 文件上传与文件管理（任意文件：图片/视频/md/APK/文档等）
 //
 // 存储策略：
 //  - 配置了 R2（env.UPLOADS）时优先写入 R2，元数据存 D1；
-//  - 未配置 R2 时回退 D1 base64 存储（单文件上限 2MB，适合 md/小图片）。
+//  - 未配置 R2 时回退 D1 base64 存储（单文件上限 25MB）。
 import { Hono } from 'hono'
 import { ErrCode, type UploadFile, type UploadKind, type UploadListResp } from '../../shared/types'
 import { fail, ok } from '../lib/response'
 import { badRequest, parseId } from '../lib/routeHelpers'
 import type { HonoEnv } from '../types'
 
-// D1 回退存储单文件上限（base64 后约 10.7MB，D1 单值安全范围内可控）
-const D1_MAX_BYTES = 8 * 1024 * 1024
-// 全部存储模式下单文件上限（R2 模式，防滥用）
-const R2_MAX_BYTES = 100 * 1024 * 1024
+// D1 回退存储单文件上限（base64 后约 33MB，D1 单值可承受；超出请配置 R2）
+const D1_MAX_BYTES = 25 * 1024 * 1024
+// R2 模式单文件上限（R2 本身无限制，此值仅为防滥用兜底）
+const R2_MAX_BYTES = 512 * 1024 * 1024
 const PAGE_SIZE = 24
 
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp', 'image/ico', 'image/x-icon'])
 const VIDEO_TYPES = new Set(['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska'])
 const MD_TYPES = new Set(['text/markdown', 'text/plain', 'text/x-markdown', 'application/octet-stream'])
+const APK_TYPES = new Set(['application/vnd.android.package-archive', 'application/x-apk', 'application/octet-stream'])
+const APK_EXT = /\.(apk|ipa|xapk)$/
 
-function detectKind(contentType: string, filename: string): UploadKind | null {
+function detectKind(contentType: string, filename: string): UploadKind {
   const lower = filename.toLowerCase()
   if (IMAGE_TYPES.has(contentType) || /\.(jpe?g|png|gif|webp|svg|bmp|ico)$/.test(lower)) return 'image'
   if (VIDEO_TYPES.has(contentType) || /\.(mp4|webm|ogv|mov|avi|mkv)$/.test(lower)) return 'video'
   if (MD_TYPES.has(contentType) || /\.(md|markdown|mdown|txt)$/.test(lower)) return 'md'
-  return null
+  if (APK_TYPES.has(contentType) || APK_EXT.test(lower)) return 'other'
+  // 其余任意文件统一归类为 other，不做类型限制
+  return 'other'
 }
 
 function safeFilename(filename: string): string {
@@ -71,9 +75,6 @@ uploadsRoutes.post('/', async (c) => {
   const filename = safeFilename(file.name || 'upload')
   const contentType = file.type || 'application/octet-stream'
   const kind = detectKind(contentType, filename)
-  if (!kind) {
-    return badRequest(c, 'only markdown, image and video files are supported')
-  }
 
   const bytes = new Uint8Array(await file.arrayBuffer())
   const size = bytes.byteLength
@@ -81,7 +82,7 @@ uploadsRoutes.post('/', async (c) => {
 
   if (useR2) {
     if (size > R2_MAX_BYTES) {
-      return badRequest(c, 'file too large (max 100MB)')
+      return badRequest(c, 'file too large (max 512MB)')
     }
     const r2Key = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 10)}-${filename}`
     await c.env.UPLOADS!.put(r2Key, bytes, { httpMetadata: { contentType } })
@@ -109,7 +110,7 @@ uploadsRoutes.post('/', async (c) => {
 
   // D1 回退：base64 存储
   if (size > D1_MAX_BYTES) {
-    return badRequest(c, 'file too large for D1 storage (max 8MB), configure R2 for bigger files')
+    return badRequest(c, 'file too large for D1 storage (max 25MB), configure R2 for bigger files')
   }
 
   let base64 = ''

@@ -42,10 +42,6 @@
     const file = input.files?.[0]
     input.value = ''
     if (!file) return
-    if (!file.type.startsWith('image/')) {
-      uploadError = '仅支持上传图片文件（png/jpg/webp/gif/svg 等）'
-      return
-    }
     uploading = true
     uploadError = ''
     try {
@@ -83,7 +79,7 @@
         class="ghost-button upload-button"
         on:click={openLocalUpload}
         disabled={loading || uploading}
-        title="上传本地图片作为图标"
+        title="上传本地文件作为图标（图片/APK/文档均可）"
       >
         {uploading ? '上传中…' : '本地上传'}
       </button>
@@ -103,7 +99,7 @@
   <input
     bind:this={fileInput}
     type="file"
-    accept="image/*"
+    accept="*"
     style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;"
     tabindex="-1"
     aria-hidden="true"
