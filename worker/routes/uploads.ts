@@ -9,8 +9,8 @@ import { fail, ok } from '../lib/response'
 import { badRequest, parseId } from '../lib/routeHelpers'
 import type { HonoEnv } from '../types'
 
-// D1 回退存储单文件上限（base64 后约 2.7MB，D1 单值安全范围）
-const D1_MAX_BYTES = 2 * 1024 * 1024
+// D1 回退存储单文件上限（base64 后约 10.7MB，D1 单值安全范围内可控）
+const D1_MAX_BYTES = 8 * 1024 * 1024
 // 全部存储模式下单文件上限（R2 模式，防滥用）
 const R2_MAX_BYTES = 100 * 1024 * 1024
 const PAGE_SIZE = 24
@@ -109,7 +109,7 @@ uploadsRoutes.post('/', async (c) => {
 
   // D1 回退：base64 存储
   if (size > D1_MAX_BYTES) {
-    return badRequest(c, 'file too large for D1 storage (max 2MB), configure R2 for bigger files')
+    return badRequest(c, 'file too large for D1 storage (max 8MB), configure R2 for bigger files')
   }
 
   let base64 = ''

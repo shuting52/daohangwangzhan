@@ -1,4 +1,4 @@
-import type { BackgroundPresetId, BackgroundSetting, CustomTheme, SearchEngine, SearchEngineSetting, ThemeMode } from '../../shared/types'
+import type { BackgroundPresetId, BackgroundSetting, CustomTheme, MarqueeSetting, SearchEngine, SearchEngineSetting, ThemeMode, ThemeTemplate } from '../../shared/types'
 import type { SettingsFormValue } from './appData'
 import { parseCssColor, splitCssColorAlpha } from './color'
 import {
@@ -8,6 +8,36 @@ import {
 } from './themePresets'
 
 export type SettingsFormModel = SettingsFormValue
+
+export const defaultMarquee: MarqueeSetting = {
+  enabled: false,
+  text: '欢迎来到我的导航站 ♡',
+  speed: 60,
+  direction: 'left',
+  font_size: 15,
+  color: '#f472b6',
+  background_color: '#fff0f6',
+  show_date: true,
+  date_format: 'YYYY-MM-DD',
+  effect: 'slide',
+  position: 'top',
+}
+
+export const siteTitleEffects: Array<{ value: SettingsFormModel['site_title_effect']; label: string; hint: string }> = [
+  { value: 'none', label: '无', hint: '静态标题。' },
+  { value: 'typing', label: '打字机', hint: '逐字打出标题文字，生动有趣。' },
+  { value: 'gradient', label: '渐变流光', hint: '渐变色彩流动，华丽吸睛。' },
+  { value: 'wave', label: '波浪律动', hint: '文字上下波浪起伏。' },
+  { value: 'shimmer', label: '闪烁光泽', hint: '高光扫过文字，梦幻闪耀。' },
+  { value: 'glow', label: '柔光呼吸', hint: '文字柔光缓慢呼吸。' },
+]
+
+export const marqueeEffectOptions: Array<{ value: MarqueeSetting['effect']; label: string; hint: string }> = [
+  { value: 'slide', label: '滑动', hint: '经典跑马灯，持续单向滚动。' },
+  { value: 'alternate', label: '来回', hint: '左右来回滚动。' },
+  { value: 'fade', label: '淡入淡出', hint: '文字逐条淡入淡出。' },
+  { value: 'blink', label: '闪烁', hint: '文字闪烁提示。' },
+]
 
 export const themeOptions: Array<{ value: ThemeMode; label: string; hint: string }> = [
   { value: 'auto', label: '跟随系统', hint: '根据设备当前主题自动切换。' },
@@ -19,6 +49,7 @@ export const backgroundTypeOptions: Array<{ value: BackgroundSetting['type']; la
   { value: 'color', label: '纯色', hint: '支持 #hex、rgb()、rgba()，也可用颜色拾取器。' },
   { value: 'gradient', label: '渐变', hint: '支持完整 CSS 渐变，也可用下方两端颜色生成。' },
   { value: 'image', label: '图片', hint: '填写图片外链 URL；配置图床后可快速上传。' },
+  { value: 'video', label: '视频', hint: '填写视频外链 URL（mp4/webm）；配置图床后可快速上传。' },
 ]
 
 export const defaultLightBackground: BackgroundSetting = {
@@ -52,6 +83,9 @@ export const emptySettingsForm: SettingsFormModel = {
   site_title: '',
   site_title_color: '#ffffff',
   site_title_font_size: 32,
+  site_title_effect: 'none',
+  marquee: { ...defaultMarquee },
+  theme_preset_id: 'custom',
   public_mode: true,
   browser_sync_enabled: false,
   theme: 'auto',
@@ -91,6 +125,9 @@ export function cloneSettingsForm(source: SettingsFormModel): SettingsFormModel 
     site_title: source.site_title,
     site_title_color: source.site_title_color,
     site_title_font_size: source.site_title_font_size,
+    site_title_effect: source.site_title_effect,
+    marquee: { ...source.marquee },
+    theme_preset_id: source.theme_preset_id,
     public_mode: source.public_mode,
     browser_sync_enabled: source.browser_sync_enabled,
     theme: source.theme,
@@ -168,6 +205,9 @@ export function createSettingsFormState(
     site_title: source?.site_title ?? '',
     site_title_color: source?.site_title_color ?? '#ffffff',
     site_title_font_size: typeof source?.site_title_font_size === 'number' ? source.site_title_font_size : 32,
+    site_title_effect: source?.site_title_effect ?? 'none',
+    marquee: { ...defaultMarquee, ...(source?.marquee ?? {}) },
+    theme_preset_id: source?.theme_preset_id ?? 'custom',
     public_mode: source?.public_mode ?? true,
     browser_sync_enabled: source?.browser_sync_enabled ?? false,
     theme: source?.theme ?? 'auto',
@@ -276,6 +316,18 @@ export function normalizeSettingsForm(source: SettingsFormModel): SettingsFormMo
     site_title: source.site_title.trim(),
     site_title_color: source.site_title_color?.trim() ?? '',
     site_title_font_size: clampNumber(source.site_title_font_size, 16, 72),
+    site_title_effect: ['none', 'typing', 'gradient', 'wave', 'shimmer', 'glow'].includes(source.site_title_effect)
+      ? source.site_title_effect
+      : 'none',
+    marquee: {
+      ...defaultMarquee,
+      ...source.marquee,
+      speed: clampNumber(source.marquee?.speed ?? defaultMarquee.speed, 1, 300),
+      font_size: clampNumber(source.marquee?.font_size ?? defaultMarquee.font_size, 10, 48),
+    },
+    theme_preset_id: source.theme_preset_id === 'custom' || ['neo-brutalism', 'bouncy', 'cute-cartoon', 'new-year', 'neumorphism', 'frosted'].includes(source.theme_preset_id)
+      ? source.theme_preset_id
+      : 'custom',
     public_mode: source.public_mode,
     browser_sync_enabled: Boolean(source.browser_sync_enabled),
     theme: source.theme,
@@ -455,5 +507,32 @@ export function applyCustomTheme(source: SettingsFormModel, customTheme: CustomT
   next.card_background_color = customTheme.card_background_color
   next.card_background_opacity = customTheme.card_background_opacity
   next.card_text_color = customTheme.card_text_color
+  return next
+}
+
+// ===== 内置主题模板（外观与卡片）=====
+
+export function applyThemeTemplate(
+  source: SettingsFormModel,
+  template: ThemeTemplate,
+  mode: 'light' | 'dark' = source.theme === 'dark' ? 'dark' : 'light',
+): SettingsFormModel {
+  const next = cloneSettingsForm(source)
+  const tpl = mode === 'dark' ? template.dark : template.light
+
+  next.backgrounds = {
+    light: cloneBackgroundSetting(template.light.background),
+    dark: cloneBackgroundSetting(template.dark.background),
+  }
+  next.background = cloneBackgroundSetting(tpl.background)
+  next.background_preset_id = 'custom'
+  next.site_title_color = tpl.site_title_color
+  next.site_title_effect = tpl.site_title_effect
+  next.card_background_color = tpl.card_background_color
+  next.card_background_opacity = tpl.card_background_opacity
+  next.card_text_color = tpl.card_text_color
+  if (template.marquee) {
+    next.marquee = { ...next.marquee, ...template.marquee }
+  }
   return next
 }

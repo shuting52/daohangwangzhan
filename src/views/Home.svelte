@@ -132,6 +132,34 @@
     ? `已整理 ${sortedCategories.length} 个分类，收录 ${totalBookmarks} 个站点。`
     : '一个简洁的公开导航首页。'
 
+  // 视频背景（本地/远程视频上传后以 URL 存储）
+  $: activeBackgroundSetting = settings?.backgrounds?.[activeTheme] ?? settings?.background
+  $: videoBackgroundUrl = activeBackgroundSetting?.type === 'video' && activeBackgroundSetting.value
+    ? activeBackgroundSetting.value
+    : ''
+
+  // 跑马灯公告
+  $: marquee = settings?.marquee ?? null
+  $: marqueeText = marquee?.text?.trim() || ''
+  $: marqueeEnabled = !!(marquee?.enabled && marqueeText)
+  $: marqueeSpeed = Math.min(40, Math.max(1, Number(marquee?.speed) || 8))
+  $: marqueeDirection = marquee?.direction === 'right' ? 'right' : 'left'
+  $: marqueeDuration = `${Math.max(6, Math.round(160 / marqueeSpeed))}s`
+  $: marqueePosition = marquee?.position === 'bottom' ? 'bottom' : 'top'
+  $: marqueeEffect = marquee?.effect || 'slide'
+  $: marqueeDate = (() => {
+    if (!marquee?.show_date) return ''
+    const now = new Date()
+    const format = marquee.date_format || 'YYYY-MM-DD'
+    const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+    return format
+      .replace(/YYYY/g, String(now.getFullYear()))
+      .replace(/MM/g, String(now.getMonth() + 1).padStart(2, '0'))
+      .replace(/DD/g, String(now.getDate()).padStart(2, '0'))
+      .replace(/dddd/g, weekdays[now.getDay()])
+      .replace(/ddd/g, weekdays[now.getDay()].replace('星期', '周'))
+  })()
+
   function replaceCategoryOrder(
     draft: PublicBookmark[],
     categoryId: number,
@@ -359,6 +387,39 @@
   class:persistent-left-navigation={navigation.position === 'left' && navigation.always_expanded && persistentLeftExpanded}
   style={homeShellStyle}
 >
+  {#if videoBackgroundUrl}
+    <video
+      class="home-video-background"
+      src={videoBackgroundUrl}
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      aria-hidden="true"
+      tabindex="-1"
+    ></video>
+  {/if}
+
+  {#if marqueeEnabled}
+    <div
+      class="home-marquee"
+      class:marquee-bottom={marqueePosition === 'bottom'}
+      class:marquee-alternate={marqueeEffect === 'alternate'}
+      class:marquee-fade={marqueeEffect === 'fade'}
+      class:marquee-blink={marqueeEffect === 'blink'}
+      style="--marquee-speed: {marqueeDuration}; --marquee-direction: {marqueeDirection === 'right' ? 'normal' : 'reverse'}; --marquee-color: {marquee?.color || '#ffffff'}; --marquee-bg: {marquee?.background_color || 'rgba(15, 23, 42, 0.75)'}; --marquee-font-size: {marquee?.font_size || 14}px;"
+      role="marquee"
+      aria-label="站点公告"
+    >
+      <span class="marquee-track">
+        <span class="marquee-content">
+          {#if marqueeDate}<span class="marquee-date">{marqueeDate}</span>{/if}
+          <span class="marquee-text">{marqueeText}</span>
+        </span>
+      </span>
+    </div>
+  {/if}
   <HomeFloatingActions
     {isAuthenticated}
     {authLoading}
@@ -598,6 +659,98 @@
 
   .home-shell.top-navigation-layout {
     padding-top: var(--top-nav-padding, 5.25rem);
+  }
+
+  /* 视频背景层 */
+  .home-video-background {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -3;
+    pointer-events: none;
+  }
+
+  /* 跑马灯公告 */
+  .home-marquee {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 90;
+    overflow: hidden;
+    padding: 7px 12px;
+    background: var(--marquee-bg);
+    color: var(--marquee-color);
+    font-size: var(--marquee-font-size);
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.16);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .home-marquee.marquee-bottom {
+    top: auto;
+    bottom: 0;
+  }
+
+  .marquee-track {
+    display: flex;
+    white-space: nowrap;
+    animation: marquee-slide var(--marquee-speed) linear infinite;
+    animation-direction: var(--marquee-direction);
+  }
+
+  .marquee-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding-right: 3rem;
+  }
+
+  .marquee-date {
+    opacity: 0.82;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+  }
+
+  @keyframes marquee-slide {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .home-marquee.marquee-alternate .marquee-track {
+    animation-name: marquee-alternate;
+  }
+
+  @keyframes marquee-alternate {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(calc(-1 * (100% - 100vw))); }
+  }
+
+  .home-marquee.marquee-fade .marquee-track {
+    animation: none;
+  }
+
+  .home-marquee.marquee-fade .marquee-content {
+    animation: marquee-fade-in 2.4s ease-in-out infinite alternate;
+  }
+
+  @keyframes marquee-fade-in {
+    0% { opacity: 0.25; transform: translateY(2px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  .home-marquee.marquee-blink .marquee-track {
+    animation-name: marquee-slide, marquee-blink;
+    animation-duration: var(--marquee-speed), 1.2s;
+  }
+
+  @keyframes marquee-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
   }
 
   @media (min-width: 800px) {

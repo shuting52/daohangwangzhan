@@ -148,7 +148,7 @@
     />
     <div class="drop-icon">⬆️</div>
     <div class="drop-title">{uploading ? '正在上传…' : '点击或拖拽文件到此处上传'}</div>
-    <div class="drop-hint">支持 Markdown（.md）、图片（jpg/png/gif/webp/svg）与视频（mp4/webm/mov），未配置 R2 时单文件上限 2MB</div>
+    <div class="drop-hint">支持 Markdown（.md）、图片（jpg/png/gif/webp/svg）与视频（mp4/webm/mov），未配置 R2 时单文件上限 8MB</div>
   </div>
 
   {#if uploadError}

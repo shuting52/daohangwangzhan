@@ -16,6 +16,7 @@
   import CardSettingsSection from './settings/CardSettingsSection.svelte'
   import FooterSettingsSection from './settings/FooterSettingsSection.svelte'
   import HeroSettingsSection from './settings/HeroSettingsSection.svelte'
+  import MarqueeSettingsSection from './settings/MarqueeSettingsSection.svelte'
   import NavigationSettingsSection from './settings/NavigationSettingsSection.svelte'
   import SearchEngineSettingsSection from './settings/SearchEngineSettingsSection.svelte'
   import SettingsHomePreview from './settings/SettingsHomePreview.svelte'
@@ -180,6 +181,7 @@
           {#if activeSectionId === 'basic'}
             <BasicSettingsSection bind:form {saving} />
             <HeroSettingsSection bind:form {saving} />
+            <MarqueeSettingsSection bind:form {saving} />
           {:else if activeSectionId === 'appearance'}
             <BackgroundSettingsSection
               bind:form

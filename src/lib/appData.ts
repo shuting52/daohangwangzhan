@@ -34,7 +34,7 @@ export type AdminBookmarkSummary = {
 
 export type SettingsFormValue = Pick<
   Settings,
-  'site_title' | 'site_title_color' | 'site_title_font_size' | 'public_mode' | 'browser_sync_enabled' | 'theme' | 'background_preset_id' | 'custom_css' | 'custom_js' | 'image_host_url' | 'background' | 'backgrounds' | 'search_engine' | 'card_size' | 'card_style' | 'card_icon_size' | 'card_show_description' | 'card_description_mode' | 'card_background_color' | 'card_background_opacity' | 'card_icon_show_title' | 'card_text_color' | 'search_box_show' | 'search_engine_selector_show' | 'content_layout' | 'navigation' | 'footer_html' | 'most_visited_count' | 'site_title_show'
+  'site_title' | 'site_title_color' | 'site_title_font_size' | 'site_title_effect' | 'marquee' | 'theme_preset_id' | 'public_mode' | 'browser_sync_enabled' | 'theme' | 'background_preset_id' | 'custom_css' | 'custom_js' | 'image_host_url' | 'background' | 'backgrounds' | 'search_engine' | 'card_size' | 'card_style' | 'card_icon_size' | 'card_show_description' | 'card_description_mode' | 'card_background_color' | 'card_background_opacity' | 'card_icon_show_title' | 'card_text_color' | 'search_box_show' | 'search_engine_selector_show' | 'content_layout' | 'navigation' | 'footer_html' | 'most_visited_count' | 'site_title_show'
 > & {
   custom_themes?: Settings['custom_themes']
 }
@@ -109,6 +109,9 @@ export function toSettingsForm(settings: Settings | null): SettingsFormValue | n
     site_title: settings.site_title,
     site_title_color: settings.site_title_color,
     site_title_font_size: settings.site_title_font_size,
+    site_title_effect: settings.site_title_effect ?? 'none',
+    marquee: settings.marquee,
+    theme_preset_id: settings.theme_preset_id ?? 'custom',
     public_mode: settings.public_mode,
     browser_sync_enabled: settings.browser_sync_enabled,
     theme: settings.theme,
@@ -240,6 +243,10 @@ export function buildHomeBackground(settings: PublicSettings | null, theme: 'lig
   if (background.type === 'image' && background.value) {
     layer = `url("${background.value}") center / cover no-repeat`
   }
+  if (background.type === 'video') {
+    // 视频背景由独立的 <video> 层渲染，CSS 层退化为遮罩底色
+    layer = 'transparent'
+  }
   const backgroundFilter = blur > 0 ? `blur(${blur}px)` : 'none'
   const backgroundTransform = blur > 0 ? 'scale(1.06)' : 'none'
   const activePreset = gradientPresets.find((preset) => preset.id === settings.background_preset_id)
@@ -282,4 +289,11 @@ export function buildHomeBackground(settings: PublicSettings | null, theme: 'lig
     `--card-description-color: ${cardDescriptionColor};`,
     `--theme-accent-color: ${accentColor};`,
   ].join(' ')
+}
+
+export function buildHomeVideoBackground(settings: PublicSettings | null, theme: 'light' | 'dark'): string | null {
+  if (!settings) return null
+  const background = settings.backgrounds?.[theme] ?? settings.background
+  if (background.type !== 'video' || !background.value) return null
+  return background.value
 }

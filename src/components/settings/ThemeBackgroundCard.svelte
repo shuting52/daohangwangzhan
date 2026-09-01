@@ -105,6 +105,20 @@
             startLabel="起始颜色"
             endLabel="结束颜色"
           />
+        {:else if background.type === 'video'}
+          <InputGroup
+            type="url"
+            bind:value={background.value}
+            placeholder="请输入视频 URL 或点击右侧上传"
+            ariaLabel={`${title}视频地址`}
+            on:input={() => void syncBackground()}
+          >
+            <svelte:fragment slot="suffix">
+              <button type="button" class="ghost-button" on:click={() => dispatch('upload')}>
+                上传本地视频 ↗
+              </button>
+            </svelte:fragment>
+          </InputGroup>
         {:else}
           <InputGroup
             type="url"

@@ -12,6 +12,8 @@
   import InputGroup from '../ui/InputGroup.svelte'
   import Slider from '../ui/Slider.svelte'
   import Tooltip from '../ui/Tooltip.svelte'
+  import { uploadsApi } from '../../lib/api'
+  import type { UploadFile } from '../../../shared/types'
 
   export let form: SettingsFormModel
   export let saving = false
@@ -26,6 +28,11 @@
   let activeTheme: 'light' | 'dark' = 'light'
   $: activeBackground = activeTheme === 'light' ? form.backgrounds.light : form.backgrounds.dark
   $: activeBackgroundValid = activeTheme === 'light' ? lightBackgroundValid : darkBackgroundValid
+  $: uploadAccept = activeBackground.type === 'video' ? 'video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo,video/x-matroska' : 'image/jpeg,image/png,image/gif,image/webp,image/svg+xml,image/bmp,image/ico'
+
+  let fileInput: HTMLInputElement | null = null
+  let uploading = false
+  let uploadError = ''
 
   async function syncForm(): Promise<void> {
     await tick()
@@ -42,9 +49,28 @@
   }
 
   function openUpload(): void {
-    if (!uploadHost) return
-    const base = uploadHost.endsWith('/') ? uploadHost.slice(0, -1) : uploadHost
-    window.open(`${base}/upload`, '_blank', 'noopener,noreferrer')
+    if (!fileInput) return
+    fileInput.value = ''
+    fileInput.click()
+  }
+
+  async function handleUploadFile(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
+    if (!file) return
+    uploading = true
+    uploadError = ''
+    try {
+      const uploaded: UploadFile = await uploadsApi.upload(file)
+      const url = new URL(uploadsApi.contentUrl(uploaded.id), window.location.origin).toString()
+      const background = { ...activeBackground, type: activeBackground.type, value: url }
+      updateThemeBackground(activeTheme, background)
+    } catch (e) {
+      uploadError = e instanceof Error ? e.message : '上传失败，请检查文件大小或图床配置'
+    } finally {
+      uploading = false
+      if (input) input.value = ''
+    }
   }
 </script>
 
@@ -102,6 +128,21 @@
             />
           {/key}
         </div>
+
+        <input
+          bind:this={fileInput}
+          type="file"
+          accept={uploadAccept}
+          style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;"
+          tabindex="-1"
+          aria-hidden="true"
+          on:change={handleUploadFile}
+        />
+        {#if uploading}
+          <p class="upload-status">正在上传背景{activeBackground.type === 'video' ? '视频' : '图片'}…</p>
+        {:else if uploadError}
+          <p class="upload-status upload-error" role="alert">{uploadError}</p>
+        {/if}
       </div>
 
       <div class="settings-subsection">
@@ -319,6 +360,17 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 12px;
+  }
+
+  .upload-status {
+    margin: 6px 0 0;
+    color: var(--sp-muted);
+    font-size: 13px;
+  }
+
+  .upload-status.upload-error {
+    color: #dc2626;
+    font-weight: 600;
   }
 
   .theme-tab-switcher {

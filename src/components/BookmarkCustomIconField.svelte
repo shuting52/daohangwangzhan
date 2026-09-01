@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { getErrorMessage, uploadsApi } from '../lib/api'
   import type { BookmarkFormValue } from '../lib/adminTypes'
   import {
     canPreviewIcon,
@@ -17,13 +18,44 @@
   export let onIconInput: ((value: string) => AsyncVoid) | undefined = undefined
   export let onOpenImageHost: (() => AsyncVoid) | undefined = undefined
 
+  let fileInput: HTMLInputElement | null = null
+  let uploading = false
+  let uploadError = ''
+
   function handleIconInput(event: Event) {
     const nextIcon = (event.currentTarget as HTMLInputElement).value
+    uploadError = ''
     void onIconInput?.(nextIcon)
   }
 
   function handleOpenImageHost() {
     void onOpenImageHost?.()
+  }
+
+  function openLocalUpload() {
+    uploadError = ''
+    fileInput?.click()
+  }
+
+  async function handleFileSelected(event: Event) {
+    const input = event.currentTarget as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      uploadError = '仅支持上传图片文件（png/jpg/webp/gif/svg 等）'
+      return
+    }
+    uploading = true
+    uploadError = ''
+    try {
+      const uploaded = await uploadsApi.upload(file)
+      await onIconInput?.(uploadsApi.contentUrl(uploaded.id))
+    } catch (error) {
+      uploadError = getErrorMessage(error) || '图标上传失败，请重试'
+    } finally {
+      uploading = false
+    }
   }
 </script>
 
@@ -45,20 +77,43 @@
         {/if}
       </span>
     {/if}
-    {#if imageHostUrl}
+    <span class="upload-actions">
       <button
         type="button"
         class="ghost-button upload-button"
-        on:click={handleOpenImageHost}
-        disabled={loading}
-        title="打开图床上传图标"
+        on:click={openLocalUpload}
+        disabled={loading || uploading}
+        title="上传本地图片作为图标"
       >
-        打开图床 ↗
+        {uploading ? '上传中…' : '本地上传'}
       </button>
-    {/if}
+      {#if imageHostUrl}
+        <button
+          type="button"
+          class="ghost-button upload-button"
+          on:click={handleOpenImageHost}
+          disabled={loading || uploading}
+          title="打开图床上传图标"
+        >
+          打开图床 ↗
+        </button>
+      {/if}
+    </span>
   </div>
+  <input
+    bind:this={fileInput}
+    type="file"
+    accept="image/*"
+    style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;"
+    tabindex="-1"
+    aria-hidden="true"
+    on:change={handleFileSelected}
+  />
   {#if faviconError}
     <small class="field-error">{faviconError}</small>
+  {/if}
+  {#if uploadError}
+    <small class="field-error">{uploadError}</small>
   {/if}
 </label>
 
@@ -75,6 +130,12 @@
   .icon-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) max-content max-content;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .upload-actions {
+    display: inline-flex;
     gap: 6px;
     align-items: center;
   }
@@ -167,7 +228,7 @@
       grid-template-columns: minmax(0, 1fr) 32px;
     }
 
-    .icon-row .upload-button {
+    .icon-row .upload-actions {
       grid-column: 1 / -1;
     }
   }

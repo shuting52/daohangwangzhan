@@ -77,8 +77,8 @@ export type BuiltinBackgroundPresetId = typeof BUILTIN_BACKGROUND_PRESET_IDS[num
 export type BackgroundPresetId = BuiltinBackgroundPresetId | 'custom'
 
 export interface BackgroundSetting {
-  type: 'image' | 'color' | 'gradient'
-  value: string // image: URL；color: #hex；gradient: CSS 渐变字符串
+  type: 'image' | 'video' | 'color' | 'gradient'
+  value: string // image/video: URL；color: #hex；gradient: CSS 渐变字符串
   blur: number // 0-20 (px)
   mask: number // 0-1 遮罩不透明度
   maskColor: string // 遮罩颜色（CSS 色值），例如 '#000000' 或 'rgba(0,0,0,0.5)'
@@ -87,6 +87,52 @@ export interface BackgroundSetting {
 export interface ThemeBackgroundSettings {
   light: BackgroundSetting
   dark: BackgroundSetting
+}
+
+// 站点标题动态效果
+export type SiteTitleEffect = 'none' | 'typing' | 'gradient' | 'wave' | 'shimmer' | 'glow'
+
+// 跑马灯公告设置
+export interface MarqueeSetting {
+  enabled: boolean
+  text: string
+  speed: number // 滚动速度，越大越快
+  direction: 'left' | 'right'
+  font_size: number
+  color: string
+  background_color: string
+  show_date: boolean
+  date_format: string // 如 'YYYY-MM-DD'、'MM月DD日'、'YYYY年MM月DD日 dddd'
+  effect: 'slide' | 'alternate' | 'fade' | 'blink' // 动态效果
+  position: 'top' | 'bottom'
+}
+
+// 内置外观主题模板 ID
+export type ThemePresetId = 'neo-brutalism' | 'bouncy' | 'cute-cartoon' | 'new-year' | 'neumorphism' | 'frosted'
+
+// 外观主题模板
+export interface ThemeTemplate {
+  id: ThemePresetId
+  name: string
+  description: string
+  tag: string
+  light: {
+    background: BackgroundSetting
+    card_background_color: string
+    card_background_opacity: number
+    card_text_color: string
+    site_title_color: string
+    site_title_effect: SiteTitleEffect
+  }
+  dark: {
+    background: BackgroundSetting
+    card_background_color: string
+    card_background_opacity: number
+    card_text_color: string
+    site_title_color: string
+    site_title_effect: SiteTitleEffect
+  }
+  marquee?: Partial<Omit<MarqueeSetting, 'enabled' | 'text'>>
 }
 
 export interface SearchEngine {
@@ -159,6 +205,9 @@ export interface Settings {
   site_title: string
   site_title_color: string
   site_title_font_size: number
+  site_title_effect: SiteTitleEffect
+  marquee: MarqueeSetting
+  theme_preset_id: ThemePresetId | 'custom'
   public_mode: boolean
   browser_sync_enabled: boolean
   theme: ThemeMode
@@ -285,6 +334,9 @@ export interface PublicSettings {
   site_title: string
   site_title_color: string
   site_title_font_size: number
+  site_title_effect: SiteTitleEffect
+  marquee: MarqueeSetting
+  theme_preset_id: ThemePresetId | 'custom'
   theme: ThemeMode
   background_preset_id: BackgroundPresetId
   background: BackgroundSetting // 兼容旧版本：新逻辑优先使用 backgrounds

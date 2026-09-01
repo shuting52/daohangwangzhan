@@ -1,14 +1,35 @@
 import {
   BUILTIN_BACKGROUND_PRESET_IDS,
+  type MarqueeSetting,
   type Settings,
+  type SiteTitleEffect,
+  type ThemePresetId,
 } from '../../shared/types'
 import { SETTINGS_KEYS } from '../../shared/settings'
+import { isThemePresetId } from '../../shared/themeTemplates'
+
+const DEFAULT_MARQUEE: MarqueeSetting = {
+  enabled: false,
+  text: '欢迎来到我的导航站 ♡',
+  speed: 60,
+  direction: 'left',
+  font_size: 15,
+  color: '#f472b6',
+  background_color: '#fff0f6',
+  show_date: true,
+  date_format: 'YYYY-MM-DD',
+  effect: 'slide',
+  position: 'top',
+}
 
 // Keep these defaults aligned with schema.sql seed settings.
 export const DEFAULT_SETTINGS: Settings = {
   site_title: 'CF-Navs',
   site_title_color: '',
   site_title_font_size: 32,
+  site_title_effect: 'none',
+  marquee: { ...DEFAULT_MARQUEE },
+  theme_preset_id: 'custom',
   public_mode: true,
   browser_sync_enabled: false,
   theme: 'light',
@@ -82,7 +103,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function normalizeBackgroundSetting(value: unknown, fallback: Settings['background']): Settings['background'] {
   if (!isRecord(value)) return { ...fallback }
 
-  const type = value.type === 'image' || value.type === 'gradient' || value.type === 'color'
+  const type = value.type === 'image' || value.type === 'video' || value.type === 'gradient' || value.type === 'color'
     ? value.type
     : fallback.type
   return {
@@ -91,6 +112,36 @@ function normalizeBackgroundSetting(value: unknown, fallback: Settings['backgrou
     blur: typeof value.blur === 'number' ? value.blur : fallback.blur,
     mask: typeof value.mask === 'number' ? value.mask : fallback.mask,
     maskColor: typeof value.maskColor === 'string' ? value.maskColor : fallback.maskColor,
+  }
+}
+
+const SITE_TITLE_EFFECTS: SiteTitleEffect[] = ['none', 'typing', 'gradient', 'wave', 'shimmer', 'glow']
+
+function normalizeSiteTitleEffect(value: unknown): SiteTitleEffect {
+  return SITE_TITLE_EFFECTS.includes(value as SiteTitleEffect) ? value as SiteTitleEffect : 'none'
+}
+
+function normalizeThemePresetId(value: unknown): ThemePresetId | 'custom' {
+  return isThemePresetId(value) ? value : 'custom'
+}
+
+function normalizeMarquee(value: unknown): MarqueeSetting {
+  const fallback = DEFAULT_SETTINGS.marquee
+  if (!isRecord(value)) return { ...fallback }
+  return {
+    enabled: typeof value.enabled === 'boolean' ? value.enabled : fallback.enabled,
+    text: typeof value.text === 'string' ? value.text : fallback.text,
+    speed: typeof value.speed === 'number' && value.speed >= 1 ? Math.min(300, value.speed) : fallback.speed,
+    direction: value.direction === 'right' ? 'right' : 'left',
+    font_size: typeof value.font_size === 'number' && value.font_size >= 10 ? Math.min(48, value.font_size) : fallback.font_size,
+    color: typeof value.color === 'string' ? value.color : fallback.color,
+    background_color: typeof value.background_color === 'string' ? value.background_color : fallback.background_color,
+    show_date: typeof value.show_date === 'boolean' ? value.show_date : fallback.show_date,
+    date_format: typeof value.date_format === 'string' ? value.date_format : fallback.date_format,
+    effect: value.effect === 'alternate' || value.effect === 'fade' || value.effect === 'blink' || value.effect === 'slide'
+      ? value.effect
+      : fallback.effect,
+    position: value.position === 'bottom' ? 'bottom' : 'top',
   }
 }
 
@@ -161,6 +212,9 @@ export function settingsFromRawMap(raw: Map<string, unknown>): Settings {
   out.navigation = normalizeNavigationSetting(raw.get('navigation'))
   out.most_visited_count = Math.min(20, Math.max(0, Math.round(Number(out.most_visited_count) || 0)))
   out.site_title_show = raw.has('site_title_show') ? Boolean(raw.get('site_title_show')) : true
+  out.site_title_effect = normalizeSiteTitleEffect(out.site_title_effect)
+  out.theme_preset_id = normalizeThemePresetId(out.theme_preset_id)
+  out.marquee = normalizeMarquee(raw.get('marquee'))
   return out
 }
 

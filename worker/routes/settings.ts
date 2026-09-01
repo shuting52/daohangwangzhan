@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
-import { BUILTIN_BACKGROUND_PRESET_IDS, ErrCode, type Settings, type SettingsUpdateReq } from '../../shared/types'
+import { BUILTIN_BACKGROUND_PRESET_IDS, ErrCode, type MarqueeSetting, type Settings, type SettingsUpdateReq } from '../../shared/types'
 import { SETTINGS_KEYS } from '../../shared/settings'
+import { isThemePresetId } from '../../shared/themeTemplates'
 import { invalidatePublicDataCache, invalidateSiteConfigCache } from '../lib/cache'
 import { ensureBrowserSyncCategory, getSettings, settingsFromPatchDefaults, touchDataVersion, updateSettings, writeSettingsPatch } from '../lib/db'
 import { fail, ok } from '../lib/response'
@@ -22,7 +23,7 @@ function isValidBackgroundPayload(value: unknown): value is Partial<Settings['ba
 
   const background = value as Partial<Settings['background']>
   return (
-    (background.type === undefined || ['image', 'color', 'gradient'].includes(background.type)) &&
+    (background.type === undefined || ['image', 'video', 'color', 'gradient'].includes(background.type)) &&
     (background.value === undefined || typeof background.value === 'string') &&
     (background.blur === undefined || typeof background.blur === 'number') &&
     (background.mask === undefined || typeof background.mask === 'number') &&
@@ -31,6 +32,26 @@ function isValidBackgroundPayload(value: unknown): value is Partial<Settings['ba
 }
 
 export const settingsRoutes = new Hono<HonoEnv>()
+
+function isValidMarquee(value: unknown): value is MarqueeSetting {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false
+  }
+  const marquee = value as Partial<MarqueeSetting>
+  return (
+    (marquee.enabled === undefined || typeof marquee.enabled === 'boolean') &&
+    (marquee.text === undefined || typeof marquee.text === 'string') &&
+    (marquee.speed === undefined || typeof marquee.speed === 'number') &&
+    (marquee.direction === undefined || marquee.direction === 'left' || marquee.direction === 'right') &&
+    (marquee.font_size === undefined || typeof marquee.font_size === 'number') &&
+    (marquee.color === undefined || typeof marquee.color === 'string') &&
+    (marquee.background_color === undefined || typeof marquee.background_color === 'string') &&
+    (marquee.show_date === undefined || typeof marquee.show_date === 'boolean') &&
+    (marquee.date_format === undefined || typeof marquee.date_format === 'string') &&
+    (marquee.effect === undefined || ['slide', 'alternate', 'fade', 'blink'].includes(marquee.effect)) &&
+    (marquee.position === undefined || marquee.position === 'top' || marquee.position === 'bottom')
+  )
+}
 
 settingsRoutes.get('/', async (c) => {
   try {
@@ -48,6 +69,15 @@ settingsRoutes.put('/', async (c) => {
 
   if (body.theme !== undefined && !['light', 'dark', 'auto'].includes(body.theme)) {
     return badRequest(c, 'invalid theme')
+  }
+  if (body.site_title_effect !== undefined && !['none', 'typing', 'gradient', 'wave', 'shimmer', 'glow'].includes(body.site_title_effect)) {
+    return badRequest(c, 'invalid site_title_effect')
+  }
+  if (body.theme_preset_id !== undefined && body.theme_preset_id !== 'custom' && !isThemePresetId(body.theme_preset_id)) {
+    return badRequest(c, 'invalid theme_preset_id')
+  }
+  if (body.marquee !== undefined && !isValidMarquee(body.marquee)) {
+    return badRequest(c, 'invalid marquee')
   }
   if (
     body.background_preset_id !== undefined &&

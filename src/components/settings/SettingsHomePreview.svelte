@@ -143,6 +143,22 @@
       <div class="preview-background" aria-hidden="true"></div>
       <div class="preview-mask" aria-hidden="true"></div>
 
+      {#if previewSettings.marquee?.enabled && previewSettings.marquee?.text?.trim()}
+        <div
+          class="preview-marquee"
+          class:preview-marquee-bottom={previewSettings.marquee.position === 'bottom'}
+          style="--marquee-bg: {previewSettings.marquee.background_color || 'rgba(15, 23, 42, 0.75)'}; --marquee-color: {previewSettings.marquee.color || '#ffffff'}; --marquee-font-size: {previewSettings.marquee.font_size || 14}px;"
+          data-testid="preview-marquee"
+        >
+          <span class="preview-marquee-track">
+            <span class="preview-marquee-content">
+              <span class="preview-marquee-date">2026-09-02</span>
+              <span>{previewSettings.marquee.text.trim()}</span>
+            </span>
+          </span>
+        </div>
+      {/if}
+
       {#if previewSettings.navigation.position === 'top'}
         <nav class="preview-nav preview-nav-top" aria-label="预览分类导航" data-testid="preview-top-navigation">
           {#each previewSections as section, index (section.id)}
@@ -388,6 +404,49 @@
     z-index: -1;
     background: var(--home-background-mask-color, #000000);
     opacity: var(--home-background-mask, 0.3);
+  }
+
+  .preview-marquee {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 3;
+    overflow: hidden;
+    padding: 5px 10px;
+    background: var(--marquee-bg);
+    color: var(--marquee-color);
+    font-size: var(--marquee-font-size);
+    white-space: nowrap;
+  }
+
+  .preview-marquee.preview-marquee-bottom {
+    top: auto;
+    bottom: 0;
+  }
+
+  .preview-marquee-track {
+    display: inline-block;
+    animation: preview-marquee-scroll 14s linear infinite;
+  }
+
+  .preview-marquee-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding-right: 3rem;
+  }
+
+  .preview-marquee-date {
+    padding: 0 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    font-weight: 700;
+  }
+
+  @keyframes preview-marquee-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
   }
 
   .preview-page {

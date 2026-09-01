@@ -2,6 +2,7 @@
   import { tick } from 'svelte'
   import {
     cloneSettingsForm,
+    siteTitleEffects,
     themeOptions,
     type SettingsFormModel,
   } from '../../lib/settingsForm'
@@ -58,6 +59,23 @@
         bind:value={form.site_title_font_size}
         on:input={() => void syncForm()}
       />
+    </div>
+
+    <div class="field field-title-effect">
+      <span class="field-label">标题动态效果 <Tooltip text="让标题文字更生动美观，支持打字机、渐变流光、波浪律动等多种效果。" /></span>
+      <div class="effect-select" role="radiogroup" aria-label="标题动态效果">
+        {#each siteTitleEffects as option (option.value)}
+          <label class:active={form.site_title_effect === option.value} title={option.hint}>
+            <input
+              type="radio"
+              bind:group={form.site_title_effect}
+              value={option.value}
+              on:change={() => void syncForm()}
+            />
+            <span>{option.label}</span>
+          </label>
+        {/each}
+      </div>
     </div>
 
     <div class="field-switch field-toggle">
@@ -121,6 +139,51 @@
     grid-column: span 4;
   }
 
+  .field-title-effect {
+    grid-column: span 12;
+  }
+
+  .effect-select {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .effect-select label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--sp-option-border);
+    border-radius: 999px;
+    padding: 7px 14px;
+    background: var(--sp-option-bg);
+    color: var(--sp-label);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color var(--transition-base), background var(--transition-base), color var(--transition-base), box-shadow var(--transition-base);
+  }
+
+  .effect-select label:hover {
+    border-color: rgba(37, 99, 235, 0.45);
+    color: var(--sp-strong);
+  }
+
+  .effect-select label.active {
+    border-color: rgba(37, 99, 235, 0.72);
+    background: var(--sp-chip-bg);
+    color: var(--sp-chip-text);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  .effect-select input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
   .field-toggle,
   .field-theme {
     grid-column: span 6;
@@ -167,6 +230,7 @@
     .field-title,
     .field-title-color,
     .field-title-size,
+    .field-title-effect,
     .field-toggle,
     .field-theme {
       grid-column: 1 / -1;
@@ -177,6 +241,7 @@
     .field-title,
     .field-title-color,
     .field-title-size,
+    .field-title-effect,
     .field-toggle,
     .field-theme {
       grid-column: 1 / -1;
