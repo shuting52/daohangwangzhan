@@ -25,6 +25,8 @@ import {
   type SettingsUpdateReq,
   type SiteMetaResp,
   type SortReq,
+  type UploadFile,
+  type UploadListResp,
 } from '../../shared/types'
 
 export interface StoredAuthSession extends LoginResp { }
@@ -396,6 +398,23 @@ export const settingsApi = {
   update: (payload: SettingsUpdateReq) => jsonRequest<Settings>('/settings', 'PUT', payload, true),
 }
 
+export const uploadsApi = {
+  list: (page = 1) => request<UploadListResp>(`/uploads?page=${page}`, { auth: true, cache: 'no-store' }),
+  upload: (file: File) => {
+    const form = new FormData()
+    form.append('file', file)
+    return request<UploadFile>('/uploads', {
+      method: 'POST',
+      auth: true,
+      body: form,
+      // 上传用浏览器自动生成的 multipart boundary，不能手动设置 content-type
+      headers: { accept: 'application/json' },
+    })
+  },
+  remove: (id: number) => request<null>(`/uploads/${id}`, { method: 'DELETE', auth: true }),
+  contentUrl: (id: number) => `/api/file/${id}/content`,
+}
+
 export const dataApi = {
   version: (auth = false) =>
     request<DataVersionResp>('/data/version', { auth, cache: 'no-store', headers: NO_CACHE_HEADERS }),
@@ -414,6 +433,7 @@ export const api = {
   bookmarks: bookmarksApi,
   iconify: iconifyApi,
   settings: settingsApi,
+  uploads: uploadsApi,
   data: dataApi,
 }
 

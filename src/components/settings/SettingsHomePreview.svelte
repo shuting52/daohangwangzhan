@@ -53,6 +53,7 @@
 
   $: previewSettings = {
     ...settings,
+    custom_themes: settings.custom_themes ?? [],
     search_engine: {
       ...settings.search_engine,
       engines: settings.search_engine.engines.map((engine) => ({ ...engine, icon: '' })),

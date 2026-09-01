@@ -119,6 +119,38 @@ export interface NavigationSetting {
   top_layout: 'scroll' | 'wrap'
 }
 
+// 自定义主题（主题随心换）
+export interface CustomTheme {
+  id: string
+  name: string
+  theme: ThemeMode
+  background_preset_id: BackgroundPresetId
+  backgrounds: ThemeBackgroundSettings
+  card_background_color: string
+  card_background_opacity: number
+  card_text_color: string
+  created_at: number
+}
+
+// 上传文件（文件管理）
+export type UploadKind = 'image' | 'video' | 'md' | 'other'
+export type UploadStorage = 'r2' | 'd1'
+
+export interface UploadFile {
+  id: number
+  filename: string
+  content_type: string
+  size: number
+  kind: UploadKind
+  storage: UploadStorage
+  created_at: number
+}
+
+export interface UploadListResp {
+  items: UploadFile[]
+  total: number
+}
+
 // 卡片风格类型
 export type CardStyle = 'info' | 'icon' // info=详情风格, icon=极简风格
 
@@ -153,6 +185,7 @@ export interface Settings {
   footer_html: string
   most_visited_count: number
   site_title_show: boolean
+  custom_themes: CustomTheme[]
 }
 
 // ========== API 统一响应包络 ==========
@@ -276,6 +309,7 @@ export interface PublicSettings {
   custom_js: string
   most_visited_count: number
   site_title_show: boolean
+  custom_themes: CustomTheme[]
 }
 
 // GET /api/config （极简公开配置，登录页用）

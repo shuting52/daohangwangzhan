@@ -222,6 +222,7 @@ describe('app data adapters', () => {
       public_mode: settings.public_mode,
       theme: settings.theme,
       background_preset_id: settings.background_preset_id,
+      custom_themes: settings.custom_themes ?? [],
       custom_css: settings.custom_css,
       custom_js: settings.custom_js,
       image_host_url: settings.image_host_url,

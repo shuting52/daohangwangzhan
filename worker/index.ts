@@ -16,6 +16,7 @@ import installRoutes from './routes/install'
 import { iconRoutes } from './routes/icon'
 import publicRoutes from './routes/public'
 import settingsRoutes from './routes/settings'
+import { uploadContentRoutes, uploadsRoutes } from './routes/uploads'
 import type { HonoEnv } from './types'
 
 const app = new Hono<HonoEnv>()
@@ -67,6 +68,12 @@ app.route('/api/settings', settingsRoutes)
 
 app.use('/api/import', authRequired)
 app.route('/api', dataRoutes)
+
+// 文件上传管理（需登录）；文件内容读取走公开的 /api/file/:id/content
+app.use('/api/uploads', authRequired)
+app.use('/api/uploads/*', authRequired)
+app.route('/api/uploads', uploadsRoutes)
+app.route('/api/file', uploadContentRoutes)
 
 app.onError((err, c) => {
   console.error(err)

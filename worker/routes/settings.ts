@@ -162,6 +162,27 @@ settingsRoutes.put('/', async (c) => {
   if (body.footer_html !== undefined && typeof body.footer_html !== 'string') {
     return badRequest(c, 'invalid footer_html')
   }
+  if (body.custom_themes !== undefined) {
+    if (!Array.isArray(body.custom_themes)) {
+      return badRequest(c, 'invalid custom_themes')
+    }
+    for (const theme of body.custom_themes) {
+      if (
+        !theme ||
+        typeof theme !== 'object' ||
+        Array.isArray(theme) ||
+        typeof theme.id !== 'string' ||
+        typeof theme.name !== 'string' ||
+        (theme.background_preset_id !== undefined && typeof theme.background_preset_id !== 'string') ||
+        !theme.backgrounds ||
+        typeof theme.backgrounds !== 'object' ||
+        typeof theme.backgrounds.light?.value !== 'string' ||
+        typeof theme.backgrounds.dark?.value !== 'string'
+      ) {
+        return badRequest(c, 'invalid custom_themes item')
+      }
+    }
+  }
 
   // 类型校验全过之后再统一查长度，错误消息里带上字段名和上限。
   const lengthError = findSettingsLengthError(body as Record<string, unknown>)

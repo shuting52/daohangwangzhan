@@ -72,6 +72,7 @@ export const DEFAULT_SETTINGS: Settings = {
   footer_html: '',
   most_visited_count: 8,
   site_title_show: true,
+  custom_themes: [],
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

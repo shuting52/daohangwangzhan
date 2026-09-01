@@ -38,6 +38,7 @@ const settings: Settings = {
   footer_html: '<p>Footer</p>',
   most_visited_count: 8,
   site_title_show: true,
+  custom_themes: [],
 }
 
 describe('shared settings metadata', () => {

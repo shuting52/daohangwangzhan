@@ -12,7 +12,7 @@
 </script>
 
 <script lang="ts">
-  import type { ChangePasswordReq } from '../../shared/types'
+  import type { ChangePasswordReq, CustomTheme } from '../../shared/types'
   import AdminSidebar from '../components/AdminSidebar.svelte'
   import AdminPageHeader from '../components/admin/AdminPageHeader.svelte'
   import AdminTabContent from '../components/admin/AdminTabContent.svelte'
@@ -39,6 +39,7 @@
   export let settingsSaving = false
   export let settingsError = ''
   export let settingsValue: Partial<SettingsFormValue> | null = null
+  export let settingsCustomThemes: CustomTheme[] = []
   export let categoryModalMode: 'create' | 'edit' = 'create'
   export let activeCategory: Partial<CategoryFormValue> | null = null
   export let canSeeHome = false
@@ -151,6 +152,7 @@
       {settingsLoading}
       {settingsSaving}
       {settingsError}
+      {settingsCustomThemes}
       {settingsValue}
       {importing}
       {exporting}

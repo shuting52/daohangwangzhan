@@ -44,6 +44,7 @@ describe('api client surface', () => {
       'install',
       'public',
       'settings',
+      'uploads',
     ])
   })
 

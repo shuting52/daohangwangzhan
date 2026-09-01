@@ -1045,6 +1045,7 @@
         settingsSaving={savingSettings}
         settingsError={settingsError}
         settingsValue={settingsValue}
+        settingsCustomThemes={adminData.settings?.custom_themes ?? []}
         categoryModalOpen={categoryModalOpen}
         categoryModalMode={categoryModalMode}
         activeCategory={activeCategory}

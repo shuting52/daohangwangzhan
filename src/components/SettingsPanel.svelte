@@ -1,7 +1,8 @@
 <script lang="ts">
-  import type { ChangePasswordReq } from '../../shared/types'
+  import type { ChangePasswordReq, CustomTheme } from '../../shared/types'
   import {
     cloneSettingsForm,
+    createCustomThemeFromForm,
     createSettingsFormState,
     emptySettingsForm,
     normalizeSettingsForm,
@@ -19,6 +20,7 @@
   import SearchEngineSettingsSection from './settings/SearchEngineSettingsSection.svelte'
   import SettingsHomePreview from './settings/SettingsHomePreview.svelte'
   import PasswordChangePanel from './PasswordChangePanel.svelte'
+  import { toastStore } from '../lib/toast'
 
   type SettingsPanelValue = SettingsFormModel
   type AsyncVoid<T = void> = T | Promise<T>
@@ -27,6 +29,7 @@
   export let loading = false
   export let saving = false
   export let error = ''
+  export let customThemes: CustomTheme[] = []
   export let onSubmit: ((payload: SettingsPanelValue) => AsyncVoid) | undefined = undefined
   export let onChangePassword: ((payload: ChangePasswordReq) => AsyncVoid) | undefined = undefined
 
@@ -45,6 +48,10 @@
   let activeSectionId = 'basic'
   let appearanceAdvancedOpen = false
   let previewTheme: 'light' | 'dark' = 'light'
+  let localCustomThemes: CustomTheme[] = []
+  let lastSyncedCustomThemesKey = ''
+  let savingTheme = false
+  let activeCustomThemeId: string | null = null
 
   $: nextKey = JSON.stringify({ value, loading })
   $: if (nextKey !== formKey) {
@@ -52,6 +59,14 @@
     initialForm = createSettingsFormState(value)
     form = cloneSettingsForm(initialForm)
     appearanceAdvancedOpen = shouldAutoExpandAppearanceAdvanced(initialForm)
+    localCustomThemes = customThemes.map((theme) => ({ ...theme }))
+    lastSyncedCustomThemesKey = JSON.stringify(customThemes)
+    activeCustomThemeId = null
+  }
+
+  $: if (JSON.stringify(customThemes) !== lastSyncedCustomThemesKey) {
+    lastSyncedCustomThemesKey = JSON.stringify(customThemes)
+    localCustomThemes = customThemes.map((theme) => ({ ...theme }))
   }
 
   $: normalizedForm = normalizeSettingsForm(form)
@@ -94,7 +109,28 @@
       return
     }
 
-    await onSubmit?.(normalizedForm)
+    await onSubmit?.({ ...normalizedForm, custom_themes: localCustomThemes })
+  }
+
+  async function handleSaveCustomTheme(name: string): Promise<void> {
+    savingTheme = true
+    try {
+      const theme = createCustomThemeFromForm(form, name)
+      localCustomThemes = [...localCustomThemes, theme]
+      activeCustomThemeId = theme.id
+      form = { ...form, background_preset_id: 'custom' }
+      toastStore.addToast('主题已保存，点击「保存设置」后生效', 'success')
+    } finally {
+      savingTheme = false
+    }
+  }
+
+  function handleDeleteCustomTheme(id: string): void {
+    localCustomThemes = localCustomThemes.filter((theme) => theme.id !== id)
+    if (activeCustomThemeId === id) {
+      activeCustomThemeId = null
+    }
+    toastStore.addToast('主题已移除，点击「保存设置」后生效', 'success')
   }
 
   function handleAppearanceAdvancedChange(open: boolean): void {
@@ -148,7 +184,12 @@
             <BackgroundSettingsSection
               bind:form
               {saving}
+              customThemes={localCustomThemes}
+              savingTheme={savingTheme}
+              activeCustomThemeId={activeCustomThemeId}
               onAdvancedChange={handleAppearanceAdvancedChange}
+              onSaveCustomTheme={handleSaveCustomTheme}
+              onDeleteCustomTheme={handleDeleteCustomTheme}
             />
             <CardSettingsSection bind:form {saving} />
             <AdvancedSettingsSection

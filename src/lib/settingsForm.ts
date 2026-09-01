@@ -1,4 +1,4 @@
-import type { BackgroundPresetId, BackgroundSetting, SearchEngine, SearchEngineSetting, ThemeMode } from '../../shared/types'
+import type { BackgroundPresetId, BackgroundSetting, CustomTheme, SearchEngine, SearchEngineSetting, ThemeMode } from '../../shared/types'
 import type { SettingsFormValue } from './appData'
 import { parseCssColor, splitCssColorAlpha } from './color'
 import {
@@ -423,4 +423,37 @@ export function getActiveGradientPresetId(source: SettingsFormModel): GradientPr
     return presetId
   }
   return 'custom'
+}
+
+// ===== 自定义主题（主题随心换）=====
+
+export function createCustomThemeFromForm(source: SettingsFormModel, name: string): CustomTheme {
+  return {
+    id: `ct_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
+    name: name.trim() || '未命名主题',
+    theme: source.theme,
+    background_preset_id: source.background_preset_id,
+    backgrounds: {
+      light: cloneBackgroundSetting(source.backgrounds.light),
+      dark: cloneBackgroundSetting(source.backgrounds.dark),
+    },
+    card_background_color: source.card_background_color,
+    card_background_opacity: source.card_background_opacity,
+    card_text_color: source.card_text_color,
+    created_at: Date.now(),
+  }
+}
+
+export function applyCustomTheme(source: SettingsFormModel, customTheme: CustomTheme): SettingsFormModel {
+  const next = cloneSettingsForm(source)
+  next.background_preset_id = customTheme.background_preset_id
+  next.backgrounds = {
+    light: cloneBackgroundSetting(customTheme.backgrounds.light),
+    dark: cloneBackgroundSetting(customTheme.backgrounds.dark),
+  }
+  next.background = cloneBackgroundSetting(next.theme === 'dark' ? customTheme.backgrounds.dark : customTheme.backgrounds.light)
+  next.card_background_color = customTheme.card_background_color
+  next.card_background_opacity = customTheme.card_background_opacity
+  next.card_text_color = customTheme.card_text_color
+  return next
 }

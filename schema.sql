@@ -79,4 +79,19 @@ INSERT OR IGNORE INTO settings (key, value) VALUES
   ('search_engine_selector_show', 'true'),
   ('content_layout', '{"max_width":1200,"max_width_unit":"px","margin_x":0,"margin_top":0,"margin_bottom":0}'),
   ('navigation', '{"position":"left","always_expanded":false,"top_layout":"scroll"}'),
-  ('footer_html', '""');
+  ('footer_html', '""'),
+  ('custom_themes', '[]');
+
+-- 上传文件（文件管理：md/图片/视频）
+CREATE TABLE IF NOT EXISTS uploads (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  filename     TEXT NOT NULL,
+  content_type TEXT NOT NULL,
+  size         INTEGER NOT NULL DEFAULT 0,
+  kind         TEXT NOT NULL DEFAULT 'other',   -- image/video/md/other
+  storage      TEXT NOT NULL DEFAULT 'd1',      -- r2=Cloudflare R2 / d1=D1 base64
+  r2_key       TEXT,                            -- R2 对象键
+  data         TEXT,                            -- D1 存储时的 base64 数据
+  created_at   INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_uploads_created ON uploads(created_at);

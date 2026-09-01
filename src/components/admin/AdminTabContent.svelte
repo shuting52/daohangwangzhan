@@ -1,9 +1,10 @@
 <script lang="ts">
-  import type { ChangePasswordReq } from '../../../shared/types'
+  import type { ChangePasswordReq, CustomTheme } from '../../../shared/types'
   import BackupPanel from '../BackupPanel.svelte'
   import BookmarkListPanel from './BookmarkListPanel.svelte'
   import CategoryListPanel from './CategoryListPanel.svelte'
   import AnalyticsPanel from './AnalyticsPanel.svelte'
+  import UploadPanel from './UploadPanel.svelte'
   import type { BackupSelection } from '../../lib/appBackup'
   import type { AdminBookmarkSummary, AdminCategorySummary, SettingsFormValue } from '../../lib/appData'
   import type { AdminTab, CategorySortHandler } from '../../lib/adminTypes'
@@ -28,6 +29,7 @@
   export let settingsLoading = false
   export let settingsSaving = false
   export let settingsError = ''
+  export let settingsCustomThemes: CustomTheme[] = []
   export let settingsValue: Partial<SettingsFormValue> | null = null
   export let importing = false
   export let exporting = false
@@ -81,6 +83,8 @@
       {onBatchDeleteBookmarks}
       {onSortBookmarks}
     />
+  {:else if activeTab === 'uploads'}
+    <UploadPanel {isAuthenticated} />
   {:else if activeTab === 'analytics'}
     <AnalyticsPanel
       {bookmarks}
@@ -95,6 +99,7 @@
           loading={settingsLoading}
           saving={settingsSaving}
           error={settingsError}
+          customThemes={settingsCustomThemes}
           onSubmit={onSubmitSettings}
           onChangePassword={onChangePassword}
         />

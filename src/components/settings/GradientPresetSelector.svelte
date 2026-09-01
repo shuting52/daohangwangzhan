@@ -1,12 +1,19 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
   import { gradientPresets, type ThemeGradientPreset } from '../../lib/themePresets'
+  import type { CustomTheme } from '../../../shared/types'
 
   export let activeGradientPresetId = 'custom'
+  export let activeCustomThemeId: string | null = null
+  export let customThemes: CustomTheme[] = []
+  export let savingTheme = false
 
   const dispatch = createEventDispatcher<{
     custom: void
     select: ThemeGradientPreset
+    selectCustomTheme: CustomTheme
+    saveCustomTheme: string
+    deleteCustomTheme: string
   }>()
 
   $: glassPresets = gradientPresets.filter((preset) => preset.surface === 'glass')
@@ -17,6 +24,20 @@
   ]
 
   let presetsExpanded = false
+  let saveThemeOpen = false
+  let saveThemeName = ''
+
+  function openSaveTheme(): void {
+    saveThemeName = ''
+    saveThemeOpen = true
+  }
+
+  function confirmSaveTheme(): void {
+    if (saveThemeName.trim().length === 0) return
+    const name = saveThemeName.trim()
+    saveThemeOpen = false
+    dispatch('saveCustomTheme', name)
+  }
 </script>
 
 <div class="gradient-preset-panel">
@@ -76,6 +97,75 @@
     <span>{presetsExpanded ? '收起其他方案' : '查看更多方案'}</span>
     <span aria-hidden="true">{presetsExpanded ? '⌃' : '⌄'}</span>
   </button>
+
+  {#if customThemes.length > 0}
+    <div class="gradient-preset-group my-themes">
+      <div class="gradient-preset-group-title">
+        <strong>我的主题</strong>
+        <span>保存喜欢的配色，一键随心切换（保存设置后生效）</span>
+      </div>
+      <div class="gradient-preset-grid">
+        {#each customThemes as theme (theme.id)}
+          <div
+            class="gradient-preset-option my-theme"
+            class:active={activeGradientPresetId === 'custom' && activeCustomThemeId === theme.id}
+            style={`--preset-light-bg: ${theme.backgrounds.light.value}; --preset-dark-bg: ${theme.backgrounds.dark.value};`}
+            title={theme.name}
+          >
+            <input
+              type="radio"
+              name="gradient-preset"
+              checked={activeGradientPresetId === 'custom' && activeCustomThemeId === theme.id}
+              on:change={() => dispatch('selectCustomTheme', theme)}
+            />
+            <span class="preset-preview" aria-hidden="true">
+              <span class="preset-swatch light"></span>
+              <span class="preset-swatch dark"></span>
+            </span>
+            <span class="preset-copy">
+              <strong>{theme.name}</strong>
+              <small>点击应用 · {new Date(theme.created_at).toLocaleDateString()} 创建</small>
+            </span>
+            <button
+              type="button"
+              class="my-theme-delete"
+              title="删除该主题"
+              aria-label={`删除主题 ${theme.name}`}
+              on:click|stopPropagation={(e) => { e.preventDefault(); dispatch('deleteCustomTheme', theme.id) }}
+            >×</button>
+          </div>
+        {/each}
+      </div>
+    </div>
+  {/if}
+
+  {#if saveThemeOpen}
+    <div class="save-theme-pop">
+      <label for="save-theme-name">主题名称</label>
+      <div class="save-theme-row">
+        <input
+          id="save-theme-name"
+          type="text"
+          maxlength="30"
+          placeholder="例如：我的夜晚配色"
+          bind:value={saveThemeName}
+          on:keydown={(e) => { if (e.key === 'Enter') confirmSaveTheme() }}
+        />
+        <button type="button" class="save-theme-confirm" disabled={!saveThemeName.trim()} on:click={confirmSaveTheme}>保存</button>
+        <button type="button" class="save-theme-cancel" on:click={() => saveThemeOpen = false}>取消</button>
+      </div>
+    </div>
+  {:else}
+    <button
+      type="button"
+      class="preset-expand-toggle save-theme-toggle"
+      data-testid="gradient-preset-save-theme"
+      disabled={savingTheme}
+      on:click={openSaveTheme}
+    >
+      <span>{savingTheme ? '保存中…' : '💾 将当前配色保存为我的主题'}</span>
+    </button>
+  {/if}
 
   <div class="gradient-preset-group">
     <div class="gradient-preset-group-title"><strong>自定义</strong><span>手动维护浅色/深色背景与卡片参数</span></div>
@@ -311,6 +401,107 @@
     line-clamp: unset;
   }
 
+  .my-theme {
+    position: relative;
+  }
+
+  .my-theme-delete {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.55);
+    color: #fff;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--transition-base), background var(--transition-base);
+  }
+
+  .my-theme:hover .my-theme-delete,
+  .my-theme:focus-within .my-theme-delete {
+    opacity: 1;
+  }
+
+  .my-theme-delete:hover {
+    background: rgba(220, 38, 38, 0.9);
+  }
+
+  .save-theme-pop {
+    display: grid;
+    gap: 6px;
+    border: 1px solid var(--sp-option-border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: var(--sp-option-bg);
+  }
+
+  .save-theme-pop label {
+    color: var(--sp-heading);
+    font-size: 13px;
+    font-weight: 650;
+  }
+
+  .save-theme-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .save-theme-row input {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid var(--sp-option-border);
+    border-radius: 10px;
+    padding: 7px 10px;
+    background: var(--sp-input-bg, #ffffff);
+    color: var(--sp-heading);
+    font: inherit;
+    font-size: 13px;
+  }
+
+  .save-theme-row input:focus-visible {
+    outline: 2px solid var(--sp-accent);
+    outline-offset: 1px;
+  }
+
+  .save-theme-confirm,
+  .save-theme-cancel {
+    border-radius: 10px;
+    padding: 7px 12px;
+    border: 1px solid var(--sp-option-border);
+    background: transparent;
+    color: var(--sp-heading);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 650;
+    cursor: pointer;
+  }
+
+  .save-theme-confirm {
+    background: var(--sp-accent);
+    border-color: var(--sp-accent);
+    color: #fff;
+  }
+
+  .save-theme-confirm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .save-theme-toggle {
+    color: var(--sp-accent);
+  }
+
+  .save-theme-toggle:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
   @media (max-width: 720px) {
     .gradient-preset-header {
       flex-direction: column;
@@ -322,6 +513,10 @@
 
     .gradient-preset-group.collapsed .gradient-preset-option:nth-child(n + 3) {
       display: none;
+    }
+
+    .save-theme-row {
+      flex-wrap: wrap;
     }
   }
 
