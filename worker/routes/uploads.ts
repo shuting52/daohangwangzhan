@@ -2,15 +2,17 @@
 //
 // 存储策略：
 //  - 配置了 R2（env.UPLOADS）时优先写入 R2，元数据存 D1；
-//  - 未配置 R2 时回退 D1 base64 存储（单文件上限 25MB）。
+//  - 未配置 R2 时回退 D1 base64 存储。
 import { Hono } from 'hono'
 import { ErrCode, type UploadFile, type UploadKind, type UploadListResp } from '../../shared/types'
 import { fail, ok } from '../lib/response'
 import { badRequest, parseId } from '../lib/routeHelpers'
 import type { HonoEnv } from '../types'
 
-// D1 回退存储单文件上限（base64 后约 33MB，D1 单值可承受；超出请配置 R2）
-const D1_MAX_BYTES = 25 * 1024 * 1024
+// D1 回退存储单文件上限：D1 单行（STRING/BLOB）硬上限 2,000,000 字节，
+// base64 膨胀 4/3，故原始文件需 ≤ 1.5MB 才能安全落库（留 ~0.3MB 余量）。
+// 超出请配置 R2（R2 模式上限见 R2_MAX_BYTES）。
+const D1_MAX_BYTES = 1_500_000
 // R2 模式单文件上限（R2 本身无限制，此值仅为防滥用兜底）
 const R2_MAX_BYTES = 512 * 1024 * 1024
 const PAGE_SIZE = 24
@@ -108,9 +110,12 @@ uploadsRoutes.post('/', async (c) => {
     return c.json(ok(row ? toUploadFile(row) : null))
   }
 
-  // D1 回退：base64 存储
+  // D1 回退：base64 存储（D1 单行硬上限 2MB，原始文件安全上限 1.5MB）
   if (size > D1_MAX_BYTES) {
-    return badRequest(c, 'file too large for D1 storage (max 25MB), configure R2 for bigger files')
+    return badRequest(
+      c,
+      `文件过大：当前存储（D1）仅支持 ≤1.5MB 的文件；请在 Cloudflare 控制台开通 R2 后即可上传 512MB 以内的任意文件`,
+    )
   }
 
   let base64 = ''
