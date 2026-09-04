@@ -28,6 +28,7 @@ import {
   type SortReq,
   type UploadFile,
   type UploadListResp,
+  type AdminStats,
 } from '../../shared/types'
 
 export interface StoredAuthSession extends LoginResp { }
@@ -349,6 +350,7 @@ export const publicApi = {
 
 export const adminApi = {
   getData: () => request<AdminData>('/admin/data', { auth: true, cache: 'no-store', headers: NO_CACHE_HEADERS }),
+  stats: () => request<AdminStats>('/admin/stats', { auth: true, cache: 'no-store', headers: NO_CACHE_HEADERS }),
 }
 
 export const authApi = {
