@@ -194,7 +194,8 @@ export interface CustomTheme {
 }
 
 // 上传文件（文件管理）
-export type UploadKind = 'image' | 'video' | 'md' | 'other'
+// kind 分类：image/video/md/apk/document/archive/audio/other
+export type UploadKind = 'image' | 'video' | 'md' | 'apk' | 'document' | 'archive' | 'audio' | 'other'
 export type UploadStorage = 'r2' | 'd1'
 
 export interface UploadFile {

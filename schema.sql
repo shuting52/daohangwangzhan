@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS uploads (
   filename     TEXT NOT NULL,
   content_type TEXT NOT NULL,
   size         INTEGER NOT NULL DEFAULT 0,
-  kind         TEXT NOT NULL DEFAULT 'other',   -- image/video/md/other
+  kind         TEXT NOT NULL DEFAULT 'other',   -- image/video/md/apk/document/archive/audio/other
   storage      TEXT NOT NULL DEFAULT 'd1',      -- r2=Cloudflare R2 / d1=D1 base64
   r2_key       TEXT,                            -- R2 对象键
   data         TEXT,                            -- D1 存储时的 base64 数据

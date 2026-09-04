@@ -19,16 +19,70 @@ const PAGE_SIZE = 24
 
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp', 'image/ico', 'image/x-icon'])
 const VIDEO_TYPES = new Set(['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska'])
-const MD_TYPES = new Set(['text/markdown', 'text/plain', 'text/x-markdown', 'application/octet-stream'])
-const APK_TYPES = new Set(['application/vnd.android.package-archive', 'application/x-apk', 'application/octet-stream'])
-const APK_EXT = /\.(apk|ipa|xapk)$/
+const MD_TYPES = new Set(['text/markdown', 'text/plain', 'text/x-markdown'])
+const APK_TYPES = new Set(['application/vnd.android.package-archive', 'application/x-apk', 'application/vnd.android.apk', 'application/octet-stream'])
+const APK_EXT = /\.(apk|xapk|apks)$/
+const IPA_EXT = /\.(ipa|deb)$/
+const DOCUMENT_TYPES = new Set([
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/rtf',
+  'text/csv',
+  'application/vnd.oasis.opendocument.text',
+  'application/vnd.oasis.opendocument.spreadsheet',
+  'application/vnd.oasis.opendocument.presentation',
+])
+const DOCUMENT_EXT = /\.(pdf|docx?|xlsx?|pptx?|rtf|csv|odt|ods|odp)$/
+const ARCHIVE_TYPES = new Set([
+  'application/zip',
+  'application/x-zip-compressed',
+  'application/x-rar-compressed',
+  'application/vnd.rar',
+  'application/x-7z-compressed',
+  'application/x-tar',
+  'application/gzip',
+  'application/x-bzip2',
+])
+const ARCHIVE_EXT = /\.(zip|rar|7z|tar|gz|bz2|tgz|tar\.gz)$/
+const AUDIO_TYPES = new Set([
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/wav',
+  'audio/x-wav',
+  'audio/ogg',
+  'audio/flac',
+  'audio/aac',
+  'audio/m4a',
+  'audio/x-m4a',
+  'audio/webm',
+  'audio/x-ms-wma',
+])
+const AUDIO_EXT = /\.(mp3|wav|flac|aac|m4a|wma|ogg|opus)$/
 
 function detectKind(contentType: string, filename: string): UploadKind {
   const lower = filename.toLowerCase()
+  // 图片
   if (IMAGE_TYPES.has(contentType) || /\.(jpe?g|png|gif|webp|svg|bmp|ico)$/.test(lower)) return 'image'
+  // 视频
   if (VIDEO_TYPES.has(contentType) || /\.(mp4|webm|ogv|mov|avi|mkv)$/.test(lower)) return 'video'
+  // 音频
+  if (AUDIO_TYPES.has(contentType) || AUDIO_EXT.test(lower)) return 'audio'
+  // Markdown / 文本
   if (MD_TYPES.has(contentType) || /\.(md|markdown|mdown|txt)$/.test(lower)) return 'md'
-  if (APK_TYPES.has(contentType) || APK_EXT.test(lower)) return 'other'
+  // Android 应用包（APK / XAPK / APKS）；iOS IPA 归类为 document
+  if (APK_TYPES.has(contentType) && APK_EXT.test(lower)) return 'apk'
+  if (APK_EXT.test(lower)) return 'apk'
+  // 文档（PDF / Word / Excel / PPT / RTF / CSV / ODF）
+  if (DOCUMENT_TYPES.has(contentType) || DOCUMENT_EXT.test(lower)) return 'document'
+  // iOS 应用包（IPA）归入文档类
+  if (IPA_EXT.test(lower)) return 'document'
+  // 压缩包（ZIP / RAR / 7Z / TAR / GZ）
+  if (ARCHIVE_TYPES.has(contentType) || ARCHIVE_EXT.test(lower)) return 'archive'
   // 其余任意文件统一归类为 other，不做类型限制
   return 'other'
 }
