@@ -213,6 +213,22 @@ export interface UploadListResp {
   total: number
 }
 
+// 站点数据中心实时统计
+export interface AdminStats {
+  categories: number
+  bookmarks: number
+  publicBookmarks: number
+  clicks: number
+  uploads: {
+    files: number
+    bytes: number
+    d1Files: number
+    r2Files: number
+  }
+  version: string | number | null
+  generatedAt: number
+}
+
 // 卡片风格类型
 export type CardStyle = 'info' | 'icon' // info=详情风格, icon=极简风格
 
