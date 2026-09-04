@@ -2,6 +2,7 @@
   import { onDestroy, onMount } from 'svelte'
   import type { CardStyle, DescriptionDisplayMode, PublicBookmark } from '../../shared/types'
   import BookmarkCardCompact from './BookmarkCardCompact.svelte'
+  import { isNewBookmark } from '../lib/bookmarkNewBadge'
   import { publicStore } from '../lib/stores'
   import { api } from '../lib/api'
   import BookmarkCardInfo from './BookmarkCardInfo.svelte'
@@ -294,6 +295,7 @@
       {hasCustomIconBackground}
       {preview}
       {themeOverride}
+      {showNewBadge}
       onLinkClick={handleLinkClick}
       onContextMenu={handleContextMenu}
       onIconError={handleIconError}

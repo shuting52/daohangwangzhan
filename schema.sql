@@ -55,7 +55,7 @@ INSERT OR IGNORE INTO settings (key, value) VALUES
   ('site_title_color', '""'),
   ('site_title_font_size', '32'),
   ('site_title_effect', '"none"'),
-  ('marquee', '{"enabled":false,"text":"欢迎来到我的导航站 ♡","speed":60,"direction":"left","font_size":15,"color":"#f472b6","background_color":"#fff0f6","show_date":true,"date_format":"YYYY-MM-DD","effect":"slide","position":"top"}'),
+  ('marquee', '{"enabled":false,"text":"欢迎来到我的导航站 ♡","speed":60,"direction":"left","font_size":15,"color":"#f472b6","background_color":"#fff0f6","show_date":true,"date_format":"YYYY-MM-DD","effect":"slide","position":"top","content_source":"manual"}'),
   ('theme_preset_id', '"custom"'),
   ('public_mode', 'true'),
   ('browser_sync_enabled', 'false'),
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS uploads (
   filename     TEXT NOT NULL,
   content_type TEXT NOT NULL,
   size         INTEGER NOT NULL DEFAULT 0,
-  kind         TEXT NOT NULL DEFAULT 'other',   -- image/video/md/apk/document/archive/audio/other
+  kind         TEXT NOT NULL DEFAULT 'other',   -- image/video/md/other
   storage      TEXT NOT NULL DEFAULT 'd1',      -- r2=Cloudflare R2 / d1=D1 base64
   r2_key       TEXT,                            -- R2 对象键
   data         TEXT,                            -- D1 存储时的 base64 数据

@@ -17,7 +17,7 @@
   let fileInput: HTMLInputElement | null = null
   let dragActive = false
 
-  const acceptedTypes = '.md,.markdown,.txt,.jpg,.jpeg,.png,.gif,.webp,.svg,.bmp,.ico,.mp4,.webm,.ogv,.mov,.avi,.mkv,.mp3,.wav,.flac,.aac,.m4a,.wma,.ogg,.opus,.apk,.xapk,.apks,.ipa,.deb,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.rtf,.csv,.odt,.ods,.odp,.zip,.rar,.7z,.tar,.gz,.bz2'
+  const acceptedTypes = '.md,.markdown,.txt,.jpg,.jpeg,.png,.gif,.webp,.svg,.bmp,.mp4,.webm,.ogv,.mov,.avi,.mkv'
 
   $: totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
@@ -96,22 +96,7 @@
     if (kind === 'image') return '图片'
     if (kind === 'video') return '视频'
     if (kind === 'md') return 'Markdown'
-    if (kind === 'audio') return '音频'
-    if (kind === 'apk') return 'APK'
-    if (kind === 'document') return '文档'
-    if (kind === 'archive') return '压缩包'
     return '文件'
-  }
-
-  function kindIcon(kind: string): string {
-    if (kind === 'image') return '🖼'
-    if (kind === 'video') return '🎬'
-    if (kind === 'md') return '📄'
-    if (kind === 'audio') return '🎵'
-    if (kind === 'apk') return '🤖'
-    if (kind === 'document') return '📃'
-    if (kind === 'archive') return '🗜'
-    return '📦'
   }
 
   function isImage(file: UploadFile): boolean {
@@ -120,18 +105,6 @@
 
   function isVideo(file: UploadFile): boolean {
     return file.kind === 'video'
-  }
-
-  function isAudio(file: UploadFile): boolean {
-    return file.kind === 'audio'
-  }
-
-  function isPreviewable(file: UploadFile): boolean {
-    return file.kind === 'image' || file.kind === 'video' || file.kind === 'md' || file.kind === 'audio'
-  }
-
-  function isDownloadOnly(file: UploadFile): boolean {
-    return file.kind === 'apk' || file.kind === 'document' || file.kind === 'archive' || file.kind === 'other'
   }
 
   function openPreview(file: UploadFile) {
@@ -175,7 +148,7 @@
     />
     <div class="drop-icon">⬆️</div>
     <div class="drop-title">{uploading ? '正在上传…' : '点击或拖拽文件到此处上传'}</div>
-    <div class="drop-hint">支持图片、视频、音频、Markdown、APK/IPA、文档（PDF/Word/Excel/PPT）、压缩包等；未配置 R2 时单文件上限 1.5MB，配置 R2 后上限 512MB</div>
+    <div class="drop-hint">支持 Markdown（.md）、图片（jpg/png/gif/webp/svg）与视频（mp4/webm/mov），未配置 R2 时单文件上限 8MB</div>
   </div>
 
   {#if uploadError}
@@ -206,7 +179,7 @@
           {:else if isVideo(file)}
             <div class="file-thumb video-thumb" on:click={() => openPreview(file)}>🎬</div>
           {:else}
-            <div class="file-thumb md-thumb" on:click={() => openPreview(file)}>{kindIcon(file.kind)}</div>
+            <div class="file-thumb md-thumb" on:click={() => openPreview(file)}>📄</div>
           {/if}
           <div class="file-meta">
             <div class="file-name" title={file.filename}>{file.filename}</div>
@@ -253,27 +226,8 @@
           <img src={uploadsApi.contentUrl(preview.id)} alt={preview.filename} />
         {:else if isVideo(preview)}
           <video src={uploadsApi.contentUrl(preview.id)} controls autoplay muted />
-        {:else if isAudio(preview)}
-          <div class="audio-preview">
-            <div class="audio-icon">🎵</div>
-            <audio src={uploadsApi.contentUrl(preview.id)} controls autoplay />
-            <div class="audio-name">{preview.filename}</div>
-          </div>
-        {:else if preview.kind === 'md'}
-          <iframe src={uploadsApi.contentUrl(preview.id)} title={preview.filename} />
         {:else}
-          <div class="download-preview">
-            <div class="download-icon">{kindIcon(preview.kind)}</div>
-            <div class="download-name">{preview.filename}</div>
-            <div class="download-type">{kindLabel(preview.kind)} · {formatSize(preview.size)}</div>
-            <a
-              class="download-btn"
-              href={uploadsApi.contentUrl(preview.id)}
-              download={preview.filename}
-              target="_blank"
-              rel="noreferrer"
-            >下载文件</a>
-          </div>
+          <iframe src={uploadsApi.contentUrl(preview.id)} title={preview.filename} />
         {/if}
       </div>
       <div class="preview-footer">
@@ -547,88 +501,6 @@
     height: 70vh;
     border: none;
     background: #fff;
-  }
-
-  .audio-preview {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    padding: 40px;
-  }
-
-  .audio-preview .audio-icon {
-    font-size: 64px;
-    line-height: 1;
-  }
-
-  .audio-preview .audio-name {
-    font-size: 14px;
-    color: #cbd5e1;
-    max-width: 600px;
-    text-align: center;
-    word-break: break-all;
-  }
-
-  .audio-preview audio {
-    width: min(500px, 80vw);
-  filter: invert(0.85) hue-rotate(180deg);
-  border-radius: 10px;
-  outline: none;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  pointer-events: auto;
-  opacity: 1;
-  visibility: visible;
-  height: auto;
-  display: inline-block;
-  }
-
-  .audio-preview audio::-webkit-media-controls-panel {
-    flex-direction: column;
-  }
-
-  .download-preview {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    padding: 48px 32px;
-    color: #e2e8f0;
-  }
-
-  .download-preview .download-icon {
-    font-size: 72px;
-    line-height: 1;
-  }
-
-  .download-preview .download-name {
-    font-size: 16px;
-    font-weight: 600;
-    text-align: center;
-    word-break: break-all;
-    max-width: 600px;
-  }
-
-  .download-preview .download-type {
-    font-size: 13px;
-    color: #94a3b8;
-  }
-
-  .download-preview .download-btn {
-    margin-top: 8px;
-    padding: 10px 28px;
-    border-radius: 10px;
-    background: #2563eb;
-    color: #fff;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-    transition: background var(--transition-fast);
-  }
-
-  .download-preview .download-btn:hover {
-    background: #1d4ed8;
   }
 
   .preview-footer {

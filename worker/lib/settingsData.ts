@@ -148,6 +148,7 @@ function normalizeMarquee(value: unknown): MarqueeSetting {
       ? value.effect
       : fallback.effect,
     position: value.position === 'bottom' ? 'bottom' : 'top',
+    content_source: value.content_source === 'recent' || value.content_source === 'tools' ? value.content_source : 'manual',
   }
 }
 

@@ -36,15 +36,42 @@
       />
     </div>
 
+    <div class="field field-marquee-source">
+      <span class="field-label">公告内容来源</span>
+      <div class="segmented-control marquee-source-control" role="radiogroup" aria-label="公告内容来源">
+        <label class:active={!marquee.content_source || marquee.content_source === 'manual'}>
+          <input type="radio" bind:group={marquee.content_source} value="manual" on:change={() => void syncForm()} />
+          <span>手动文本</span>
+        </label>
+        <label class:active={marquee.content_source === 'recent'}>
+          <input type="radio" bind:group={marquee.content_source} value="recent" on:change={() => void syncForm()} />
+          <span>自动·最近上新</span>
+        </label>
+        <label class:active={marquee.content_source === 'tools'}>
+          <input type="radio" bind:group={marquee.content_source} value="tools" on:change={() => void syncForm()} />
+          <span>自动·全站工具</span>
+        </label>
+      </div>
+      {#if marquee.content_source === 'recent'}
+        <p class="field-hint">自动拼接最近 7 天上新的工具名（如“🆕 新上架：站点A、站点B”），无需手动维护。</p>
+      {:else if marquee.content_source === 'tools'}
+        <p class="field-hint">自动汇总当前全站可见工具清单，作为站点资源公告。</p>
+      {/if}
+    </div>
+
     <label class="field field-marquee-text">
-      <span>公告内容</span>
+      <span>手动公告文本</span>
       <input
         bind:value={marquee.text}
         type="text"
         maxlength="120"
         placeholder="输入公告内容，如：欢迎来到我的导航站 ♡"
+        disabled={marquee.content_source === 'recent' || marquee.content_source === 'tools'}
         on:input={() => void syncForm()}
       />
+      {#if marquee.content_source === 'recent' || marquee.content_source === 'tools'}
+        <p class="field-hint">已选自动来源，此文本仅在暂无新增内容时作为兜底展示。</p>
+      {/if}
     </label>
 
     <div class="field field-marquee-speed">
@@ -167,8 +194,12 @@
     grid-column: span 6;
   }
 
+  .field-marquee-source {
+    grid-column: span 12;
+  }
+
   .field-marquee-text {
-    grid-column: span 6;
+    grid-column: span 12;
   }
 
   .field-marquee-speed,
@@ -222,6 +253,18 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .marquee-source-control {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .field-hint {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    color: var(--sp-muted);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
   .effect-control {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -229,6 +272,7 @@
   @media (max-width: 960px) {
     .field-marquee-toggle,
     .field-marquee-text,
+    .field-marquee-source,
     .field-marquee-speed,
     .field-marquee-size,
     .field-marquee-direction,
@@ -245,6 +289,7 @@
   @container settings-editor (max-width: 620px) {
     .field-marquee-toggle,
     .field-marquee-text,
+    .field-marquee-source,
     .field-marquee-speed,
     .field-marquee-size,
     .field-marquee-direction,
@@ -255,6 +300,10 @@
     .field-marquee-date,
     .field-marquee-date-format {
       grid-column: 1 / -1;
+    }
+
+    .marquee-source-control {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
     }
 
     .effect-control {

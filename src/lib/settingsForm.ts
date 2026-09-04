@@ -21,6 +21,7 @@ export const defaultMarquee: MarqueeSetting = {
   date_format: 'YYYY-MM-DD',
   effect: 'slide',
   position: 'top',
+  content_source: 'manual',
 }
 
 export const siteTitleEffects: Array<{ value: SettingsFormModel['site_title_effect']; label: string; hint: string }> = [

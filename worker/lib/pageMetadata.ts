@@ -554,3 +554,24 @@ export function pickBookmarkTitle(input: {
   // accounts.google.com，拿登录页的域名当书签名毫无意义。
   return hostnameFallbackTitle(input.requestedUrl) || hostnameFallbackTitle(fallbackUrl)
 }
+
+// 抓取页面/站点描述：og:description > twitter:description > <meta name=description>。
+// 解析不出来时返回空字符串（不会失败）。
+export function pickBookmarkDescription(html: string | null): string {
+  if (!html) return ''
+  const head = extractHeadSection(html)
+
+  for (const key of ['og:description', 'twitter:description', 'description']) {
+    const raw = extractMetaContent(head, key)
+    if (!raw) continue
+
+    const cleaned = raw.replace(/\s+/g, ' ').trim()
+    if (!cleaned) continue
+
+    const codePoints = Array.from(cleaned)
+    if (codePoints.length <= MAX_DESCRIPTION_LENGTH) return cleaned
+    return codePoints.slice(0, MAX_DESCRIPTION_LENGTH).join('').trimEnd() + '…'
+  }
+
+  return ''
+}

@@ -131,6 +131,13 @@
     justify-content: center;
   }
 
+  .bookmark-card-info .bookmark-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
   .bookmark-card-info .bookmark-title {
     font-size: 0.9rem;
     font-weight: 600;
@@ -140,6 +147,22 @@
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .bookmark-card-info .bookmark-new-badge {
+    flex: 0 0 auto;
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background: linear-gradient(135deg, #ff6b6b, #f43f5e);
+    box-shadow: 0 2px 6px rgba(244, 63, 94, 0.35);
     white-space: nowrap;
   }
 

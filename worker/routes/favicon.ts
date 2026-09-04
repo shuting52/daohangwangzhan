@@ -6,6 +6,7 @@ import {
   fetchWithTimeout,
   hostnameFallbackTitle,
   parseTargetUrl,
+  pickBookmarkDescription,
   pickBookmarkTitle,
 } from '../lib/pageMetadata'
 import { extractManifestIcons, extractManifestUrl, fetchManifestJson } from '../lib/webManifest'
