@@ -20,6 +20,7 @@
   import NavigationSettingsSection from './settings/NavigationSettingsSection.svelte'
   import SearchEngineSettingsSection from './settings/SearchEngineSettingsSection.svelte'
   import SettingsHomePreview from './settings/SettingsHomePreview.svelte'
+  import SiteOverviewSection from './settings/SiteOverviewSection.svelte'
   import PasswordChangePanel from './PasswordChangePanel.svelte'
   import { toastStore } from '../lib/toast'
 
@@ -35,6 +36,7 @@
   export let onChangePassword: ((payload: ChangePasswordReq) => AsyncVoid) | undefined = undefined
 
   const settingsSections = [
+    { id: 'overview', label: '站点数据中心', hint: '实时统计与存储概览' },
     { id: 'basic', label: '站点设置', hint: '标题、首页显示与默认主题' },
     { id: 'appearance', label: '外观与卡片', hint: '配色、背景与书签卡片' },
     { id: 'layout', label: '布局与导航', hint: '内容宽度、边距与导航位置' },
@@ -206,6 +208,8 @@
             <SearchEngineSettingsSection bind:form {saving} {enginesValid} />
           {:else if activeSectionId === 'footer'}
             <FooterSettingsSection bind:form {saving} />
+          {:else if activeSectionId === 'overview'}
+            <SiteOverviewSection />
           {:else if activeSectionId === 'account'}
             <PasswordChangePanel {saving} {onChangePassword} />
           {/if}
