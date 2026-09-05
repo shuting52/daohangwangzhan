@@ -3,14 +3,6 @@
   <h1>CF-Navs</h1>
   <p>运行在 Cloudflare Workers 上的轻量个人导航面板</p>
   <p>在一个清爽、响应式的界面中管理分类、书签、主题、搜索服务与数据备份。</p>
-
-  <p>
-    <img src="https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white" alt="Cloudflare Workers">
-    <img src="https://img.shields.io/badge/Svelte-4-FF3E00?logo=svelte&logoColor=white" alt="Svelte 4">
-    <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript 5">
-    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-2563EB" alt="MIT License"></a>
-  </p>
-
   <p>
     <a href="#功能">功能</a> ·
     <a href="#界面预览">界面预览</a> ·
