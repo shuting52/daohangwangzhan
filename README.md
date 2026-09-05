@@ -1,6 +1,5 @@
 <div align="center">
-  <img src="public/icon.png" alt="CF-Navs 项目图标" width="112" height="112">
-  <h1>CF-Navs</h1>
+
   <p>运行在 Cloudflare Workers 上的轻量个人导航面板</p>
   <p>在一个清爽、响应式的界面中管理分类、书签、主题、搜索服务与数据备份。</p>
   <p>
