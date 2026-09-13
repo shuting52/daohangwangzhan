@@ -1,4 +1,4 @@
-# CF-Navs API 契约
+# 导航网站 API 契约
 
 共享类型定义见 `shared/types.ts`。前端和后端都应以共享类型为准；修改接口时同步更新本文件和 `shared/types.ts`。
 

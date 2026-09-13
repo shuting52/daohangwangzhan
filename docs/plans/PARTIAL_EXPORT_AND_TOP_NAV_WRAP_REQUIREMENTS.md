@@ -32,7 +32,7 @@ Issue #8 正文提出两条建议：
 | 回调 | `src/App.svelte:894-897`（`handleExportData`） | 把完整 `adminData` 交给导出函数 |
 | 导出实现 | `src/lib/appImportExport.ts:33-71`（`exportDataToFile`） | 参数是完整 `AdminData`，无范围 / ID / 过滤参数；不请求 API |
 | 组装 payload | `src/lib/appBackup.ts:12-24`（`createBackupPayload`） | 直接复制 `data.categories`、`data.bookmarks`、`data.settings` |
-| 下载 artifact | `src/lib/appBackup.ts:34-45`（`createBackupExportArtifact`） | `JSON.stringify` 完整 payload，文件名 `cf-navs-backup-YYYY-MM-DD.json` |
+| 下载 artifact | `src/lib/appBackup.ts:34-45`（`createBackupExportArtifact`） | `JSON.stringify` 完整 payload，文件名 `daohangwangzhan-backup-YYYY-MM-DD.json` |
 | 数据来源 | `worker/routes/admin.ts` `GET /api/admin/data` | 全量聚合 `AdminData`，无筛选参数 |
 
 导出文件契约 `BackupData`（`shared/types.ts:375-381`）：
@@ -104,7 +104,7 @@ interface NavigationSetting {
 - **FR-A2 层级完整性**：若导出的书签或二级分类被选中，其所属的一级分类**必须**一并写入导出文件（即使一级分类本身未被显式勾选），否则重新导入会因 `parent_id` / `category_id` 找不到父级而被 `validateImportPayload` 拒绝。
 - **FR-A3 设置项开关**：提供独立开关决定是否导出 `settings`。**默认勾选**（导出完整 `Settings`，与当前全量导出一致）；取消勾选时导出文件的 `settings` 字段为 `null`（`BackupData.settings` 已允许 `null`）。
 - **FR-A4 全选 / 全不选**：提供「全选」「清空」快捷操作；默认进入面板时为「全选」，以保证**不改变现有一键全量导出的默认体验**。
-- **FR-A5 导出结果契约不变**：导出文件仍是 `BackupData`（`version = BACKUP_VERSION`、`exported_at`、`categories[]`、`bookmarks[]`、`settings|null`），字段语义与全量导出一致；只是 `categories` / `bookmarks` 为选中子集。文件名维持 `cf-navs-backup-YYYY-MM-DD.json`（`appBackup.ts:25-28`）。
+- **FR-A5 导出结果契约不变**：导出文件仍是 `BackupData`（`version = BACKUP_VERSION`、`exported_at`、`categories[]`、`bookmarks[]`、`settings|null`），字段语义与全量导出一致；只是 `categories` / `bookmarks` 为选中子集。文件名维持 `daohangwangzhan-backup-YYYY-MM-DD.json`（`appBackup.ts:25-28`）。
 - **FR-A6 计数反馈**：导出成功提示需反映**实际导出**的分类数与书签数（复用 `createBackupExportMessage` 的口径，`appBackup.ts:30-32`），而非全库总数。
 - **FR-A7 空选择保护**：当有效选择为空（0 分类 0 书签）时禁止导出，并给出明确提示，不生成空文件。
 - **FR-A8 纯前端实现优先**：导出数据已由 `GET /api/admin/data` 全量提供给前端，筛选应在浏览器端完成，**不新增后端导出端点**，与现有架构一致。

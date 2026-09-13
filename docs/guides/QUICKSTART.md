@@ -1,4 +1,4 @@
-# CF-Navs 快速开始指南
+# 导航网站 快速开始指南
 
 这是一份简化的部署指南，适合快速上手。完整文档请查看 [DEPLOYMENT.md](DEPLOYMENT.md)。
 
@@ -12,8 +12,8 @@
 ### 1. 克隆项目并安装依赖
 
 ```bash
-git clone https://github.com/lbjxr/CF-Navs.git
-cd CF-Navs
+git clone https://github.com/shuting52/daohangwangzhan.git
+cd daohangwangzhan
 npm install
 ```
 
@@ -24,7 +24,7 @@ npm install
 npx wrangler login
 
 # 创建 D1 数据库
-npx wrangler d1 create cf-navs-db
+npx wrangler d1 create daohangwangzhan-db
 
 # 创建 KV 命名空间
 npx wrangler kv namespace create SESSION

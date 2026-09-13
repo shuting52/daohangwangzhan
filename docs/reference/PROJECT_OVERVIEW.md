@@ -1,4 +1,4 @@
-# CF-Navs 项目概览
+# 导航网站 项目概览
 
 ## 📊 项目定位
 
@@ -52,7 +52,7 @@
 - ✅ 后台书签列表按标题、分类、链接域名和打开方式进行不落盘排序
 - ✅ 访问分析：记录书签点击次数，提供已访问/零访问统计、Top 20 排行和零访问书签分页
 - ✅ 站点设置管理（站点信息、外观与卡片、布局与导航、搜索设置、页脚内容、账号安全六个二级子菜单）；标题内容、颜色和字号集中在站点信息，图床服务位于其“外部资源”子区块
-- ✅ 数据导入导出，支持 CF-Navs、SunPanel JSON 和浏览器书签 HTML 的合并或覆盖
+- ✅ 数据导入导出，支持 导航网站、SunPanel JSON 和浏览器书签 HTML 的合并或覆盖
 - ✅ 备份恢复功能
 
 ## 🏗️ 技术架构
@@ -101,7 +101,7 @@ src/
 │   ├── sortableList.ts  # 通用拖拽排序 action
 │   ├── navigationLayout.ts # 导航收缩偏好与顶部溢出计算
 │   ├── themePresets.ts  # 站点背景渐变与外观预设
-│   └── importData.ts   # CF-Navs / SunPanel 导入转换
+│   └── importData.ts   # 导航网站 / SunPanel 导入转换
 └── App.svelte          # 主应用
 ```
 
@@ -167,7 +167,7 @@ bookmarks (id, category_id, title, url, icon, icon_source, icon_blob,
 
 ### wrangler.toml
 ```toml
-name = "cf-navs"                    # Worker 名称
+name = "daohangwangzhan"                    # Worker 名称
 main = "worker/index.ts"            # Worker 入口
 compatibility_date = "2025-06-01"   # 兼容性日期
 compatibility_flags = ["nodejs_compat"]
@@ -185,7 +185,7 @@ not_found_handling = "single-page-application"
 
 [[d1_databases]]                    # D1 数据库
 binding = "DB"
-database_name = "cf-navs-db"
+database_name = "daohangwangzhan-db"
 # database_id omitted for Cloudflare Git automatic provisioning
 
 [[kv_namespaces]]                   # KV 命名空间
@@ -387,4 +387,4 @@ MIT License - 详见 [LICENSE](../../LICENSE) 文件
 
 ---
 
-**CF-Navs** - 让导航更简单 🎉
+**导航网站** - 让导航更简单 🎉

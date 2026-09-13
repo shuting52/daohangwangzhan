@@ -37,16 +37,16 @@
 ### 2. 创建 D1 数据库
 
 ```bash
-npx wrangler d1 create cf-navs-db
+npx wrangler d1 create daohangwangzhan-db
 ```
 
 预期输出：
 ```
-✅ Successfully created DB 'cf-navs-db'!
+✅ Successfully created DB 'daohangwangzhan-db'!
 
 [[d1_databases]]
 binding = "DB"
-database_name = "cf-navs-db"
+database_name = "daohangwangzhan-db"
 database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 ```
 
@@ -61,7 +61,7 @@ npx wrangler kv namespace create SESSION
 
 预期输出：
 ```
-🌀 Creating namespace with title "cf-navs-SESSION"
+🌀 Creating namespace with title "daohangwangzhan-SESSION"
 ✨ Success!
 Add the following to your wrangler.toml:
 
@@ -104,9 +104,9 @@ npm run deploy
 ```
 ✨ Built successfully!
 Total Upload: xx.xx KiB / gzip: xx.xx KiB
-Uploaded cf-navs (x.xx sec)
-Published cf-navs (x.xx sec)
-  https://cf-navs.your-subdomain.workers.dev
+Uploaded daohangwangzhan (x.xx sec)
+Published daohangwangzhan (x.xx sec)
+  https://daohangwangzhan.your-subdomain.workers.dev
 ```
 
 - [ ] 部署成功
@@ -133,7 +133,7 @@ npm run deploy
 
 ### 1. 访问站点
 
-访问你的 Workers URL（如 `https://cf-navs.xxx.workers.dev`）
+访问你的 Workers URL（如 `https://daohangwangzhan.xxx.workers.dev`）
 
 - [ ] 页面正常加载
 - [ ] 无 JavaScript 错误
@@ -291,7 +291,7 @@ npx wrangler tail
 ### 查看数据库内容
 
 ```bash
-npx wrangler d1 execute cf-navs-db --command "SELECT * FROM settings"
+npx wrangler d1 execute daohangwangzhan-db --command "SELECT * FROM settings"
 ```
 
 ### 备份数据
@@ -319,7 +319,7 @@ npx wrangler d1 execute cf-navs-db --command "SELECT * FROM settings"
 
 ## 🎉 部署成功！
 
-如果所有检查项都已完成，恭喜你成功部署了 CF-Navs！
+如果所有检查项都已完成，恭喜你成功部署了 导航网站！
 
 **首次登录提醒：**
 - Cloudflare Git 和 Wrangler CLI 新安装：访问 `/install`，使用 `SETUP_TOKEN` 授权后创建管理员用户名和密码。

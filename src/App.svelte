@@ -188,7 +188,7 @@
   $: publicData = $publicStore.data
   $: adminData = $adminStore.data
   $: canSeeHome = canSeeHomeView({ publicMode: config?.public_mode, authenticated: $isAuthenticated })
-  $: homeTitle = publicData?.settings.site_title ?? config?.site_title ?? 'CF-Navs'
+  $: homeTitle = publicData?.settings.site_title ?? config?.site_title ?? '导航网站'
 
   $: adminCategories = toAdminCategories(adminData.categories, adminData.bookmarks)
   $: adminBookmarks = toAdminBookmarks(adminData.bookmarks)
@@ -967,7 +967,7 @@
           </defs>
         </svg>
       </div>
-      <p class="eyebrow">CF-Navs</p>
+      <p class="eyebrow">导航网站</p>
       <h1>正在加载项目数据...</h1>
       <p>前端状态与后端接口正在初始化，请稍候。</p>
       <div class="app-splash-progress" aria-hidden="true">
@@ -1025,7 +1025,7 @@
               </defs>
             </svg>
           </div>
-          <p class="eyebrow">CF-Navs</p>
+          <p class="eyebrow">导航网站</p>
           <h1>请先登录管理员账号</h1>
           <p>当前站点未公开，登录后再加载后台管理界面。</p>
         </div>
@@ -1093,7 +1093,7 @@
               </defs>
             </svg>
           </div>
-          <p class="eyebrow">CF-Navs</p>
+          <p class="eyebrow">导航网站</p>
           <h1>正在加载后台...</h1>
           <p>管理界面分包正在按需载入。</p>
           <div class="app-splash-progress" aria-hidden="true">

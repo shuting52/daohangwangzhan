@@ -1,11 +1,11 @@
 # Sun-Panel 数据导入指南
 
-本指南帮助你将 Sun-Panel 导出的数据导入到 CF-Navs。
+本指南帮助你将 Sun-Panel 导出的数据导入到 导航网站。
 
 ## 📋 准备工作
 
 1. 从 Sun-Panel 导出数据
-2. 确保 CF-Navs 已部署并可以访问
+2. 确保 导航网站 已部署并可以访问
 3. 准备好管理员账号
 
 ## 🔄 导入方式
@@ -14,13 +14,13 @@
 
 当前后台已经内置 Sun-Panel JSON 转换逻辑，不需要先运行转换脚本。
 
-1. 登录 CF-Navs 后台
+1. 登录 导航网站 后台
 2. 进入 **数据备份与导入**
 3. 在"导入来源"中选择 **SunPanel 导出**
 4. 点击 **导入数据**，选择 Sun-Panel 导出的 JSON 文件
 5. 确认覆盖导入
 
-导入时可选择“追加合并”或“覆盖现有数据”；管理员账号与密码不受影响。覆盖前建议先导出一份 CF-Navs 备份。
+导入时可选择“追加合并”或“覆盖现有数据”；管理员账号与密码不受影响。覆盖前建议先导出一份 导航网站 备份。
 
 ### 方法二：使用转换脚本（可选）
 
@@ -31,7 +31,7 @@
 node scripts/convert-sunpanel.cjs <sun-panel导出文件.json> <输出文件.json>
 
 # 示例
-node scripts/convert-sunpanel.cjs SunPanel-Data.json cf-navs-import.json
+node scripts/convert-sunpanel.cjs SunPanel-Data.json daohangwangzhan-import.json
 ```
 
 转换完成后会显示：
@@ -43,7 +43,7 @@ node scripts/convert-sunpanel.cjs SunPanel-Data.json cf-navs-import.json
 
 ### 数据映射说明
 
-| Sun-Panel 字段 | CF-Navs 字段 | 说明 |
+| Sun-Panel 字段 | 导航网站 字段 | 说明 |
 |---------------|-------------|------|
 | icons[].title | categories.title | 分类名称 |
 | icons[].sort | categories.sort | 分类排序 |
@@ -66,14 +66,14 @@ node scripts/convert-sunpanel.cjs SunPanel-Data.json cf-navs-import.json
    运行时普通书签图标会优先读取聚合数据中的 `icon_blob`，没有内嵌图标时才读取浏览器本地图标缓存；缓存缺失时首页会回退使用已保存的普通 HTTP(S) 图标 URL。编辑弹窗打开后会在后台调用短超时刷新接口更新本地图标缓存，保存书签后也会显式刷新。HTTP(S) 分类图片通过 `/api/category-icon/:id` 代理读取，data URI、文字和表情分类图标直接渲染；一级标题、二级标签、搜索分组和折叠导航复用相同展示规则。Iconify 书签图标在后台预览走 `/api/iconify/*`，首页展示优先复用浏览器 HTTP 缓存。
 
 2. **打开方式**：
-   - Sun-Panel 的 `2`（新窗口）→ CF-Navs 的 `1`
-   - Sun-Panel 的 `1`（当前窗口）→ CF-Navs 的 `2`
+   - Sun-Panel 的 `2`（新窗口）→ 导航网站 的 `1`
+   - Sun-Panel 的 `1`（当前窗口）→ 导航网站 的 `2`
 
-## 📥 导入到 CF-Navs
+## 📥 导入到 导航网站
 
 ### 步骤 1：登录后台
 
-1. 访问你的 CF-Navs 站点
+1. 访问你的 导航网站 站点
 2. 点击右上角 **⚙️** 图标
 3. 输入管理员凭据登录
 
@@ -86,7 +86,7 @@ node scripts/convert-sunpanel.cjs SunPanel-Data.json cf-navs-import.json
 
 1. 在"导入来源"中选择 **SunPanel 导出**
 2. 点击 **导入数据** 按钮
-3. 选择 Sun-Panel 导出的 JSON 文件，或选择转换后的 `cf-navs-import.json`
+3. 选择 Sun-Panel 导出的 JSON 文件，或选择转换后的 `daohangwangzhan-import.json`
 
 ### 步骤 4：确认导入
 
@@ -148,12 +148,12 @@ node scripts/convert-sunpanel.cjs SunPanel-Data.json cf-navs-import.json
 
 ### Q: 导入后排序不对？
 
-**A:** Sun-Panel 和 CF-Navs 的排序字段可能不完全一致。
+**A:** Sun-Panel 和 导航网站 的排序字段可能不完全一致。
 
 **解决方法：**
 - 使用拖拽功能重新排序
 
-### Q: 可以导入到已有数据的 CF-Navs 吗？
+### Q: 可以导入到已有数据的 导航网站 吗？
 
 **A:** 可以，但：
 - 可在导入时选择“追加合并”或“覆盖现有数据”；只有选择覆盖时才会清空现有分类和书签
@@ -169,7 +169,7 @@ node scripts/convert-sunpanel.cjs SunPanel-Data.json cf-navs-import.json
 ### Q: 能否只导入部分分类？
 
 **A:** 可以，手动编辑转换后的 JSON 文件：
-1. 打开 `cf-navs-import.json`
+1. 打开 `daohangwangzhan-import.json`
 2. 删除不需要的分类和对应的书签
 3. 保存后再导入
 
@@ -177,7 +177,7 @@ node scripts/convert-sunpanel.cjs SunPanel-Data.json cf-navs-import.json
 
 ### 只导入特定分类
 
-编辑 `cf-navs-import.json`，保留需要的分类：
+编辑 `daohangwangzhan-import.json`，保留需要的分类：
 
 ```json
 {
@@ -197,7 +197,7 @@ node scripts/convert-sunpanel.cjs SunPanel-Data.json cf-navs-import.json
 
 ```bash
 # 将所有旧域名替换为新域名
-sed -i 's/old-domain.com/new-domain.com/g' cf-navs-import.json
+sed -i 's/old-domain.com/new-domain.com/g' daohangwangzhan-import.json
 ```
 
 ## 📊 转换统计
@@ -209,7 +209,7 @@ sed -i 's/old-domain.com/new-domain.com/g' cf-navs-import.json
 
 ## 🎉 完成
 
-导入完成后，你的 Sun-Panel 数据已成功迁移到 CF-Navs！
+导入完成后，你的 Sun-Panel 数据已成功迁移到 导航网站！
 
 **下一步建议：**
 1. 检查所有书签是否正常

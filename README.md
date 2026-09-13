@@ -1,5 +1,7 @@
 <div align="center">
 
+  <h1>🧭 导航网站 <code>daohangwangzhan</code></h1>
+
   <p>运行在 Cloudflare Workers 上的轻量个人导航面板</p>
   <p>在一个清爽、响应式的界面中管理分类、书签、主题、搜索服务与数据备份。</p>
   <p>
@@ -10,8 +12,11 @@
     <a href="docs/README.md">项目文档</a>
   </p>
 
-  <a href="https://github.com/lbjxr/CF-Navs/fork">
+  <a href="https://github.com/shuting52/daohangwangzhan/fork">
     <img src="https://img.shields.io/badge/Fork_on_GitHub-181717?logo=github&logoColor=white" alt="Fork on GitHub">
+  </a>
+  <a href="https://github.com/shuting52/daohangwangzhan/stargazers">
+    <img src="https://img.shields.io/github/stars/shuting52/daohangwangzhan?style=social" alt="GitHub stars">
   </a>
 </div>
 
@@ -51,28 +56,28 @@
   <tr>
     <td align="center" width="50%">
       <strong>亮色首页</strong><br>
-      <img src="docs/screenshots/cf-navs-light.jpg" alt="CF-Navs 亮色首页">
+      <img src="docs/screenshots/cf-navs-light.jpg" alt="导航网站 亮色首页">
     </td>
     <td align="center" width="50%">
       <strong>暗色首页</strong><br>
-      <img src="docs/screenshots/cf-navs-dark.jpg" alt="CF-Navs 暗色首页">
+      <img src="docs/screenshots/cf-navs-dark.jpg" alt="导航网站 暗色首页">
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
       <strong>移动端亮色</strong><br>
-      <img src="docs/screenshots/cf-navs-light-mobile.jpg" alt="CF-Navs 移动端亮色首页" width="260">
+      <img src="docs/screenshots/cf-navs-light-mobile.jpg" alt="导航网站 移动端亮色首页" width="260">
     </td>
     <td align="center" width="50%">
       <strong>移动端暗色</strong><br>
-      <img src="docs/screenshots/cf-navs-dark-mobile.jpg" alt="CF-Navs 移动端暗色首页" width="260">
+      <img src="docs/screenshots/cf-navs-dark-mobile.jpg" alt="导航网站 移动端暗色首页" width="260">
     </td>
   </tr>
 </table>
 
 <p align="center">
   <strong>主题与站点设置</strong><br>
-  <img src="docs/screenshots/cf-navs-admin-setting.jpg" alt="CF-Navs 主题与站点设置">
+  <img src="docs/screenshots/cf-navs-admin-setting.jpg" alt="导航网站 主题与站点设置">
 </p>
 
 更多界面截图位于 [`docs/screenshots`](docs/screenshots)。
@@ -81,7 +86,7 @@
 
 如果你第一次使用 Cloudflare，建议先选择一种部署方式并完整走完，不要混用两套流程。两种方式最终都会通过 `/install` 初始化数据库和管理员账号。
 
-CF-Navs 需要以下 Cloudflare 资源：
+导航网站需要以下 Cloudflare 资源：
 
 | 资源 | 绑定名 | 用途 |
 |---|---|---|
@@ -93,7 +98,7 @@ CF-Navs 需要以下 Cloudflare 资源：
 
 适合不想在本地安装 Wrangler 的用户。Cloudflare 会从 GitHub 的 `main` 分支自动构建和部署。
 
-1. [Fork 本仓库](https://github.com/lbjxr/CF-Navs/fork)，并确认 Fork 的默认分支为 `main`。
+1. [Fork 本仓库](https://github.com/shuting52/daohangwangzhan/fork)，并确认 Fork 的默认分支为 `main`。
 2. 在 Cloudflare 控制台打开 **Workers & Pages → Create application → Import a repository**，授权 Cloudflare 访问 GitHub，并选择你的 Fork。
 3. 在构建配置中填写：
    - 生产分支：`main`
@@ -119,15 +124,15 @@ CF-Navs 需要以下 Cloudflare 资源：
 前置条件：Node.js 18+、npm 和 Cloudflare 账号。所有资源命令都会作用于当前 Wrangler 登录的账号；如果你有多个 Cloudflare 账号，先用 `npx wrangler whoami` 确认账号。
 
 ```bash
-git clone https://github.com/lbjxr/CF-Navs.git
-cd CF-Navs
+git clone https://github.com/shuting52/daohangwangzhan.git
+cd daohangwangzhan
 npm install
 
 npx wrangler login
 npx wrangler whoami
 
 # 下面两个 create 命令只在资源尚不存在时执行一次
-npx wrangler d1 create cf-navs-db
+npx wrangler d1 create daohangwangzhan-db
 npx wrangler kv namespace create SESSION
 
 npm run setup:wrangler
@@ -136,7 +141,7 @@ npx wrangler secret put SETUP_TOKEN
 npm run deploy                 # Secret 生效后重新部署
 ```
 
-如果 D1 数据库或 KV 命名空间已经存在，不要再次执行 `create` 命令；先使用 `npx wrangler d1 list` 和 `npx wrangler kv namespace list` 确认当前账号中的资源，再运行 `npm run setup:wrangler`。D1 数据库名应为 `cf-navs-db`，Worker 的 KV 绑定名应为 `SESSION`。
+如果 D1 数据库或 KV 命名空间已经存在，不要再次执行 `create` 命令；先使用 `npx wrangler d1 list` 和 `npx wrangler kv namespace list` 确认当前账号中的资源，再运行 `npm run setup:wrangler`。D1 数据库名应为 `daohangwangzhan-db`，Worker 的 KV 绑定名应为 `SESSION`。
 
 `npm run setup:wrangler` 会把真实资源 ID 写入 Git 忽略的 `wrangler.local.toml`。部署完成后访问 `/install`，由安装器初始化数据库结构并创建管理员。首次部署完成前不要执行 `wrangler secret put`，因为 Worker 尚未创建。
 
@@ -198,7 +203,7 @@ git diff --check
 ## 项目结构
 
 ```text
-CF-Navs/
+daohangwangzhan/
 ├── src/                 # Svelte 页面、组件与浏览器端逻辑
 ├── worker/              # Worker 路由、中间件与 D1 数据访问
 ├── shared/              # 前后端共享类型与设置契约
@@ -231,7 +236,7 @@ CF-Navs/
 
 后台支持以下数据格式：
 
-- CF-Navs JSON 备份：保存两层分类关系，支持按完整路径追加合并或覆盖恢复。
+- 导航网站 JSON 备份：保存两层分类关系，支持按完整路径追加合并或覆盖恢复。
 - Sun-Panel 数据：分类按一级导入，并转换书签与兼容图标字段。
 - 浏览器书签 HTML：导入浏览器导出的标准文件，有效文件夹映射为两层分类，更深路径压平到二级标题。
 
@@ -252,15 +257,15 @@ CF-Navs/
 
 ## 致谢
 
-项目参考了 [Sun-Panel](https://github.com/hslr-s/sun-panel) 的设计思路，部分图标获取逻辑受 [iori-nav](https://github.com/jy02739244/iori-nav) 启发。
+项目参考了 [Sun-Panel](https://github.com/hslr-s/sun-panel) 的设计思路，部分图标获取逻辑受 [iori-nav](https://github.com/jy02739244/iori-nav) 启发；本项目基于 [CF-Navs](https://github.com/lbjxr/CF-Navs) fork 并进行了本地化与功能扩展。
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=lbjxr%2FCF-Navs&type=date&legend=top-left">
+<a href="https://www.star-history.com/#shuting52/daohangwangzhan&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=lbjxr/CF-Navs&type=date&theme=dark&legend=top-left&sealed_token=7kyATdN3x5tJ6WJAhA5MwxWL93j-C9ZnSxJli_vTqztkkZF54Sp95nJzSMW-Xggc19KoraDrqDNjCWN6VuQrSEmOX8CAbyYqMi0I_6K3DS2GEr0x1rgf8VDa2kBJIgOP74JqDldlCFRRbGGNjvrDVJ12e4SIShmH78leu6Vxg6WQzidKg4PULPCzlwi-" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=lbjxr/CF-Navs&type=date&legend=top-left&sealed_token=7kyATdN3x5tJ6WJAhA5MwxWL93j-C9ZnSxJli_vTqztkkZF54Sp95nJzSMW-Xggc19KoraDrqDNjCWN6VuQrSEmOX8CAbyYqMi0I_6K3DS2GEr0x1rgf8VDa2kBJIgOP74JqDldlCFRRbGGNjvrDVJ12e4SIShmH78leu6Vxg6WQzidKg4PULPCzlwi-" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=lbjxr/CF-Navs&type=date&legend=top-left&sealed_token=7kyATdN3x5tJ6WJAhA5MwxWL93j-C9ZnSxJli_vTqztkkZF54Sp95nJzSMW-Xggc19KoraDrqDNjCWN6VuQrSEmOX8CAbyYqMi0I_6K3DS2GEr0x1rgf8VDa2kBJIgOP74JqDldlCFRRbGGNjvrDVJ12e4SIShmH78leu6Vxg6WQzidKg4PULPCzlwi-" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=shuting52/daohangwangzhan&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=shuting52/daohangwangzhan&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=shuting52/daohangwangzhan&type=Date" />
  </picture>
 </a>
 

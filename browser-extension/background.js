@@ -69,7 +69,7 @@ function enqueue(bookmark) {
     try {
       await syncBookmarks(batch)
     } catch (error) {
-      console.warn('[CF-Navs] bookmark sync failed', error)
+      console.warn('[daohangwangzhan] bookmark sync failed', error)
     }
   }, 800)
 }

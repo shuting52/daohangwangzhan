@@ -1,6 +1,6 @@
 # Performance Testing
 
-This project includes two real-browser Chrome scripts for the production site or any deployed CF-Navs origin.
+This project includes two real-browser Chrome scripts for the production site or any deployed 导航网站 origin.
 
 - `npm run perf:audit` checks performance-sensitive behavior and thresholds.
 - `npm run regression:chrome` checks broader functional regression paths without modifying data.
@@ -17,7 +17,7 @@ Default endpoint:
 http://127.0.0.1:9223
 ```
 
-Each script creates a dedicated test tab for `BASE_URL`, logs in through the page, runs the audit, prints JSON metrics, removes `cf-navs.auth`, and closes only that test tab before exit. Existing user tabs are never reused or closed.
+Each script creates a dedicated test tab for `BASE_URL`, logs in through the page, runs the audit, prints JSON metrics, removes `daohangwangzhan.auth`, and closes only that test tab before exit. Existing user tabs are never reused or closed.
 
 ## Local Target Configuration
 
@@ -29,7 +29,7 @@ Copy-Item verify.local.example.json verify.local.json
 
 ```json
 {
-  "baseUrl": "https://your-cf-navs-domain.example",
+  "baseUrl": "https://your-daohangwangzhan-domain.example",
   "chromeDebugPort": "9223"
 }
 ```
@@ -62,7 +62,7 @@ npm run regression:chrome
 
 该选项只适用于脚本创建的临时 profile，不要用于用户已有浏览器或默认 profile。脚本仍以临时 profile 的 `DevToolsActivePort` 为启动成功条件，并在退出时按完整 profile 路径清理进程。
 
-By default `regression:chrome` starts a temporary Chrome profile under the operating system temporary directory, named `cf-navs-chrome-profile-<port>`. Its `finally` cleanup closes the test-owned browser, stops only Chrome processes matching that exact profile, verifies the remaining process count is zero, and then removes the profile.
+By default `regression:chrome` starts a temporary Chrome profile under the operating system temporary directory, named `daohangwangzhan-chrome-profile-<port>`. Its `finally` cleanup closes the test-owned browser, stops only Chrome processes matching that exact profile, verifies the remaining process count is zero, and then removes the profile.
 
 When Chrome is already running with a dynamic DevTools port, the script can connect through the browser websocket only if `REGRESSION_ALLOW_EXISTING_CHROME=1` and `CHROME_DEVTOOLS_ACTIVE_PORT_FILE` are set for a browser dedicated to this test. In that mode the JSON output reports `browserConnectionMode: "dedicated-existing-browser"` and does not start a temporary Chrome process. The helper `scripts/discover-devtools.ps1` never scans the default Chrome profile; existing-browser discovery requires an explicit active-port file and opt-in switch.
 
@@ -80,13 +80,13 @@ For unattended runs where an existing Chrome profile must not be used, force a t
 ```powershell
 $env:REGRESSION_FORCE_TEMP_CHROME = '1'
 $env:CHROME_DEBUG_PORT = '9230'
-$env:CHROME_USER_DATA_DIR = "$env:TEMP\cf-navs-chrome-profile-9230"
+$env:CHROME_USER_DATA_DIR = "$env:TEMP\daohangwangzhan-chrome-profile-9230"
 npm run regression:chrome
 ```
 
 With `REGRESSION_FORCE_TEMP_CHROME=1`, the regression script skips `DevToolsActivePort`. If the configured port is already in use, it fails instead of attaching to an existing browser.
 
-For safety, `CHROME_USER_DATA_DIR` must end with `cf-navs-chrome-profile-<unique-id>`. The script refuses arbitrary profile paths so it can never delete a normal Chrome profile during cleanup. `REGRESSION_CLEAR_ORIGIN_DATA=1` is rejected when the run reuses an existing browser.
+For safety, `CHROME_USER_DATA_DIR` must end with `daohangwangzhan-chrome-profile-<unique-id>`. The script refuses arbitrary profile paths so it can never delete a normal Chrome profile during cleanup. `REGRESSION_CLEAR_ORIGIN_DATA=1` is rejected when the run reuses an existing browser.
 
 Never clean up with `taskkill /IM chrome.exe`, `Get-Process chrome | Stop-Process`, or another process-name-wide command. If exact-profile process cleanup fails, treat the regression run as failed and report the remaining process count.
 

@@ -240,7 +240,7 @@ graph TD
 **目标：整个开发+测试过程不需要用户任何确认，包括浏览器「允许」按钮。**
 
 - **采用**：自启动的**隔离无头 Chrome + CDP**（沿用 `scripts/chrome-regression.mjs` / `real-chrome-cdp-testing` 模式），针对**本地开发服务器**验证。
-  - 专用临时 `--user-data-dir`（名称 `cf-navs-chrome-profile-<id>`）：全新 profile 无扩展、无权限状态 → **不弹权限/允许/调试对话框**；无头运行不抢占用户窗口焦点。
+  - 专用临时 `--user-data-dir`（名称 `daohangwangzhan-chrome-profile-<id>`）：全新 profile 无扩展、无权限状态 → **不弹权限/允许/调试对话框**；无头运行不抢占用户窗口焦点。
   - 连接返回的 `webSocketDebuggerUrl`，用项目依赖 `ws` 发送 CDP（Node 内置 WebSocket 在本仓库不可靠）。
   - 登录用页面上下文 `fetch('/api/login', …)`，不走 UI 打字（`AGENTS.md`）。
   - 本地请求用 `--noproxy '*'` 绕过 `HTTP(S)_PROXY`（`127.0.0.1:10808`），避免 502。

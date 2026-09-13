@@ -1,4 +1,4 @@
-# CF-Navs 问题排查
+# 导航网站 问题排查
 
 ## 部署失败
 
@@ -49,13 +49,13 @@ npm run build && npx wrangler deploy
 
 ### Database not found
 
-`npm run db:init:remote` 只用于 `/install` 无法应用 schema 时的恢复。执行前检查 `wrangler.local.toml` 中的 `database_id` 是否对应当前 Cloudflare 账号下的 `cf-navs-db`：
+`npm run db:init:remote` 只用于 `/install` 无法应用 schema 时的恢复。执行前检查 `wrangler.local.toml` 中的 `database_id` 是否对应当前 Cloudflare 账号下的 `daohangwangzhan-db`：
 
 ```bash
 npm run db:init:remote
 ```
 
-如果仍失败，检查 `wrangler.local.toml` 中的 `database_id` 是否对应当前 Cloudflare 账号下的 `cf-navs-db`。
+如果仍失败，检查 `wrangler.local.toml` 中的 `database_id` 是否对应当前 Cloudflare 账号下的 `daohangwangzhan-db`。
 
 ## 登录失败
 
@@ -176,12 +176,12 @@ https://icon-sets.iconify.design/mdi/home/
 
 请检查：
 
-1. JSON 文件是否为 Sun-Panel 原始导出或 CF-Navs 备份格式。
+1. JSON 文件是否为 Sun-Panel 原始导出或 导航网站 备份格式。
 2. 文件是否过大导致浏览器或 Worker 超时。
 3. 浏览器控制台是否有解析错误。
 4. Worker 日志是否有 D1 写入错误。
 
-导入模式可选择“追加合并”或“覆盖现有数据”；执行覆盖前，建议先在后台导出一份 CF-Navs 备份。
+导入模式可选择“追加合并”或“覆盖现有数据”；执行覆盖前，建议先在后台导出一份 导航网站 备份。
 
 ## 常用诊断命令
 
@@ -189,7 +189,7 @@ https://icon-sets.iconify.design/mdi/home/
 npx wrangler tail
 npm run type-check
 npm run build
-npx wrangler d1 execute cf-navs-db --remote --command "SELECT key, value FROM settings LIMIT 20"
+npx wrangler d1 execute daohangwangzhan-db --remote --command "SELECT key, value FROM settings LIMIT 20"
 ```
 
 涉及线上数据的命令请先确认当前 Cloudflare 账号和 Wrangler 配置指向正确项目。

@@ -1,10 +1,10 @@
-# CF-Navs 技术细节
+# 导航网站 技术细节
 
 本文档收纳 README 中不适合放在首页的实现细节，方便需要维护或调优项目时查阅。
 
 ## 图标处理
 
-CF-Navs 支持多种图标来源：
+导航网站 支持多种图标来源：
 
 - Favicon.im
 - Google favicon
@@ -161,7 +161,7 @@ Worker 和前端共同承担缓存：
 - Service Worker 预缓存 `/index.html` 作为离线导航回退。
 - Service Worker 对同源图标代理和构建资源采用 cache-first 策略；跨域 Iconify SVG 只在响应可读且不超过 512KB 时写入 Cache Storage，不缓存 `opaque` 响应。
 
-浏览器本地存储只保留必要副本：后台聚合数据快照会清理旧登录态对应的同源快照；后台书签列表已有 `icon_blob` 时直接展示并删除同 key 的本地图标副本，不在翻页预览时把 data URI 再复制到 `cf-navs-bookmark-icons-v1`。
+浏览器本地存储只保留必要副本：后台聚合数据快照会清理旧登录态对应的同源快照；后台书签列表已有 `icon_blob` 时直接展示并删除同 key 的本地图标副本，不在翻页预览时把 data URI 再复制到 `daohangwangzhan-bookmark-icons-v1`。
 
 部署新版后，如果浏览器仍使用旧逻辑，可以强制刷新一次页面，让新版 Service Worker 接管。
 
@@ -214,6 +214,6 @@ Worker 对 HTML 响应设置基础安全头：
 
 ## Sun-Panel 导入相关
 
-Sun-Panel 导入会转换分类、书签、打开方式和图标字段。Iconify 图标会尽量规范化为 CF-Navs 的标准保存格式；后台预览使用 `/api/iconify/*` 代理，首页展示优先复用浏览器本地缓存的 Iconify SVG。
+Sun-Panel 导入会转换分类、书签、打开方式和图标字段。Iconify 图标会尽量规范化为 导航网站 的标准保存格式；后台预览使用 `/api/iconify/*` 代理，首页展示优先复用浏览器本地缓存的 Iconify SVG。
 
 更完整的迁移步骤见 [SUNPANEL_IMPORT.md](../guides/SUNPANEL_IMPORT.md)。

@@ -1,4 +1,4 @@
-# CF-Navs 平台优化开发计划
+# 导航网站 平台优化开发计划
 
 审计基线：`develop` @ `c5b70ae`，`npm test` 483 passed / 78 files，`npm run type-check` 0 error / 0 warning。
 
@@ -67,7 +67,7 @@
 
 **证据**
 
-`src/App.svelte:357-395` 的 `checkInstallStatus()` 无条件 `await api.install.status()`，本地的 `cf-navs:installed` 标记只在**请求失败后**才作为兜底使用：
+`src/App.svelte:357-395` 的 `checkInstallStatus()` 无条件 `await api.install.status()`，本地的 `daohangwangzhan:installed` 标记只在**请求失败后**才作为兜底使用：
 
 ```ts
 const installedHint = hasInstalledHint(getInstallHintStorage())
@@ -161,7 +161,7 @@ SELECT value FROM settings WHERE key = 'data_version'
 **验收**
 
 - 新增 `tests/unit/serviceWorkerPrecache.test.ts` 源码契约：`public/sw.js` 存在 `message` 事件监听且只接受同源 `/assets/` 前缀 URL；`src/main.ts` 在注册成功后发送该消息。
-- 真实浏览器复核（部署后）：首次访问完成后，Cache Storage `cf-navs-v*` 中存在 `index-*.js` 与 `index-*.css`；第二次访问时这两个请求的 Network 面板来源标记为 ServiceWorker。
+- 真实浏览器复核（部署后）：首次访问完成后，Cache Storage `daohangwangzhan-v*` 中存在 `index-*.js` 与 `index-*.css`；第二次访问时这两个请求的 Network 面板来源标记为 ServiceWorker。
 - SW 缓存版本号 `CACHE` 需要递增，避免旧版本 SW 的缓存条目残留。
 
 **完成记录**
@@ -172,7 +172,7 @@ SELECT value FROM settings WHERE key = 'data_version'
 
 **关键细节**：首次访问时 `navigator.serviceWorker.controller` 还是 `null`（SW 尚未接管），必须回退到 `registration.active`——而这一次恰恰是最需要预热的，因为 SW 拦不到当次的 JS/CSS 请求。有专门用例锁住这条。
 
-SW 侧对收到的清单再校验一次同源和 `/assets/` 前缀，逐个 `cache.add` 而不是 `addAll`（任何一个失败都不该让整批预热落空），已存在的条目跳过。`CACHE` 从 `cf-navs-v14` 升到 `v15`。
+SW 侧对收到的清单再校验一次同源和 `/assets/` 前缀，逐个 `cache.add` 而不是 `addAll`（任何一个失败都不该让整批预热落空），已存在的条目跳过。`CACHE` 从 `daohangwangzhan-v14` 升到 `v15`。
 
 变更文件：`public/sw.js`、`src/main.ts`、`src/lib/serviceWorkerClient.ts`（新增）；测试 `tests/unit/serviceWorkerClient.test.ts`（新增 13，与 L4 共用）。
 
@@ -333,7 +333,7 @@ document.body.appendChild(scriptTag)
 第一轮实现是 `script-src 'self' 'unsafe-inline'`。随后逐条核对隐患时发现三件当时没算清的事：
 
 1. **导入是一条真实的注入链路。** `POST /api/import` 的覆盖模式会写 `settings`，`buildSettingsPatchParams` 遍历 `SETTINGS_KEYS`（其中包含 `custom_js` 和 `footer_html`），而 `validateImportPayload` 对 `settings` **只检查 `isPlainObject`**。也就是说，从论坛或他人处拿到的备份 JSON 可以夹带脚本，导入后立即对所有访客生效。`unsafe-inline` 之前，CSP 会拦住 `footer_html` 那条；之后不会。
-2. **`connect-src 'self'` 挡不住外泄。** `img-src` 允许任意 https，图片信标就能把 `localStorage['cf-navs.auth']` 里的管理员 JWT 带走；`form-action` 不回落到 `default-src`，不声明等于不限制。
+2. **`connect-src 'self'` 挡不住外泄。** `img-src` 允许任意 https，图片信标就能把 `localStorage['daohangwangzhan.auth']` 里的管理员 JWT 带走；`form-action` 不回落到 `default-src`，不声明等于不限制。
 3. 原注入写在 `App.svelte` 的大响应式块里，该块还引用 `activeTheme` / `homeBackgroundStyle`，**每次切主题都会把用户脚本删掉重跑一遍**。之前 CSP 拦着，这个 bug 一直潜伏。
 
 **最终方案（用户第二轮选择）：改注入方式，CSP 不放宽内联。**
@@ -417,7 +417,7 @@ Worker 侧 `worker/routes/bookmarks.ts:70-71`（POST）与 `:114-115`（PUT）�
 
 - 浏览器书签 HTML：`src/lib/importData.ts:223-225` 的 `validBookmarkUrl` 已经限制 `^https?://` 并计入 `skipped`。**这条路径已经安全。**
 - SunPanel JSON：`src/lib/importData.ts:30-34` 的 `normalizeUrl` 只做 trim，无协议校验。
-- CF-Navs 备份 JSON：原样透传备份文件中的 `url`。
+- 导航网站 备份 JSON：原样透传备份文件中的 `url`。
 
 而且前端过滤只是便利性的——`POST /api/import` 是登录后可直接调用的接口，任何客户端都能绕过前端提交任意 `url`。**权威边界必须在 Worker 侧。**
 
@@ -863,7 +863,7 @@ S3 走了两轮。第一轮实现 `'unsafe-inline'` 后逐条核对隐患，发�
 单元测试只能锁住纯函数、源码契约和路由行为。以下几条必须在部署后用真实浏览器确认：
 
 - **L1**：二次访问首页时网络面板不出现 `/api/install/status`；清掉 localStorage 后首次访问仍出现一次。
-- **L3**：首次访问结束后 Cache Storage `cf-navs-v15` 中存在 `index-*.js` 与 `index-*.css`；第二次访问这两个请求来源标记为 ServiceWorker。
+- **L3**：首次访问结束后 Cache Storage `daohangwangzhan-v15` 中存在 `index-*.js` 与 `index-*.css`；第二次访问这两个请求来源标记为 ServiceWorker。
 - **L4**：二访首屏不等网络即可绘制；部署新版本后第一次打开出现「已检测到新版本」提示；离线时仍能打开。
 - **S1**：跑一次 `scripts/smoke-test.mjs`，确认第 347 行「登出后 token 失效 → 401」现在通过（这条断言自 `a296e74` 起一直是失败的）。
 - **S3**：后台填一段自定义 JS（例如 `console.log('ok')`），确认它真的执行且控制台无 CSP 违规——`blob:` 在 `script-src` 下的行为单测环境验证不了。再切换一次主题，确认脚本**不会**重复执行。
