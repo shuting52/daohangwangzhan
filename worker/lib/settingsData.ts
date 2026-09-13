@@ -20,6 +20,7 @@ const DEFAULT_MARQUEE: MarqueeSetting = {
   date_format: 'YYYY-MM-DD',
   effect: 'slide',
   position: 'top',
+  content_source: 'manual',
 }
 
 // Keep these defaults aligned with schema.sql seed settings.

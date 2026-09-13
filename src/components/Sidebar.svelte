@@ -20,7 +20,7 @@
 
   export let items: NavigationItem[] = []
   export let activeId: string | number | null = null
-  export let navigation: NavigationSetting = { position: 'left', always_expanded: false, top_layout: 'scroll' }
+  export let navigation: NavigationSetting = { position: 'left', always_expanded: false, top_layout: 'scroll', show_icons: true, show_counts: true, show_site_name: true, nav_font_size: 14, nav_icon_size: 20, hide_empty_categories: false }
   export let siteName = ''
   export let onNavigate: ((id: string | number) => void) | undefined = undefined
   export let onPersistentExpansionChange: ((expanded: boolean) => void) | undefined = undefined

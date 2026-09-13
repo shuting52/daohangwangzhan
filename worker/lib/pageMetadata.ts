@@ -6,6 +6,7 @@ export const HTML_ACCEPT = 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.1'
 export const MAX_HTML_BYTES = 131_072
 export const FETCH_TIMEOUT_MS = 3000
 export const MAX_TITLE_LENGTH = 80
+export const MAX_DESCRIPTION_LENGTH = 200
 // charset 只可能出现在文档开头，扫描前若干字节即可，不必解码整篇。
 const CHARSET_SNIFF_BYTES = 2048
 // 标题和 og 标签都在 <head> 里，读到 </head> 就可以断开连接，

@@ -106,6 +106,7 @@ export interface MarqueeSetting {
   date_format: string // 如 'YYYY-MM-DD'、'MM月DD日'、'YYYY年MM月DD日 dddd'
   effect: 'slide' | 'alternate' | 'fade' | 'blink' // 动态效果
   position: 'top' | 'bottom'
+  content_source: 'manual' | 'recent' | 'tools' // 跑马灯内容来源
 }
 
 // 内置外观主题模板 ID

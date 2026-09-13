@@ -1,4 +1,4 @@
-name = "cf-navs"
+name = "daohangwangzhan"
 main = "worker/index.ts"
 compatibility_date = "2025-06-01"
 compatibility_flags = ["nodejs_compat"]
@@ -28,7 +28,10 @@ SESSION_TTL = "2592000"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "cf-navs-db"
+database_name = "daohangwangzhan-db"
+# ⚠️ 请确认与你 Cloudflare 账号中实际的 D1 数据库名一致（控制台 → Workers & Pages →
+# daohangwangzhan → Settings → Bindings 可查看 DB 绑定指向的数据库名）。
+# 如果名字不同，请改回你账号里实际的名字，否则部署会因找不到数据库而失败。
 # Cloudflare Git deployments automatically provision the D1 database when the
 # database_id is omitted. Local CLI deployments use wrangler.local.toml.
 

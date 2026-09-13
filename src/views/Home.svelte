@@ -80,15 +80,14 @@
   $: sortedBookmarks = homeData.getSortedBookmarks(bookmarks)
   $: allCategoryBookmarks = groupBookmarksByCategory(sortedBookmarks)
   $: displayCategoryBookmarks = homeSortMode ? groupBookmarksByCategory(homeSortDraft) : allCategoryBookmarks
-  $: navigationSections = getHomeSections(categoryForest, allCategoryBookmarks)
   $: navigationSections = navigation?.hide_empty_categories
-    ? navigationSections
+    ? getHomeSections(categoryForest, allCategoryBookmarks)
         .map((section) => ({
           ...section,
           children: (section.children ?? []).filter((child) => (child.count ?? 0) > 0 || (child.children?.length ?? 0) > 0),
         }))
         .filter((section) => (section.count ?? 0) > 0 || (section.children?.length ?? 0) > 0)
-    : navigationSections
+    : getHomeSections(categoryForest, allCategoryBookmarks)
   $: categoryGroups = getHomeCategoryGroups(categoryForest, selectedCategoryIds)
   $: activeId = resolveHomeActiveSectionId(navigationSections, activeId)
 
@@ -121,7 +120,7 @@
     margin_bottom: 0,
   }
   $: contentMaxWidth = `${contentLayout.max_width}${contentLayout.max_width_unit}`
-  $: navigation = settings?.navigation ?? { position: 'left', always_expanded: false, top_layout: 'scroll' } satisfies NavigationSetting
+  $: navigation = settings?.navigation ?? { position: 'left', always_expanded: false, top_layout: 'scroll', show_icons: true, show_counts: true, show_site_name: true, nav_font_size: 14, nav_icon_size: 20, hide_empty_categories: false } satisfies NavigationSetting
   $: isTopNavigation = navigation.position === 'top'
   $: navigationScrollOffset = isTopNavigation ? TOP_NAV_SCROLL_TOP_OFFSET : LEFT_NAV_SCROLL_TOP_OFFSET
   $: cardTextColor = settings?.card_text_color?.trim() ?? ''
