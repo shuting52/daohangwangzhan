@@ -20,6 +20,7 @@ export const emptyBookmarkForm: BookmarkFormValue = {
   description_mode: 'inherit',
   open_method: 'new_tab',
   is_private: false,
+  is_recommended: false,
 }
 
 export function createBookmarkFormValue(
@@ -38,6 +39,7 @@ export function createBookmarkFormValue(
     description: value?.description ?? '',
     open_method: value?.open_method ?? 'new_tab',
     is_private: value?.is_private === true,
+    is_recommended: value?.is_recommended === true,
   }
 }
 

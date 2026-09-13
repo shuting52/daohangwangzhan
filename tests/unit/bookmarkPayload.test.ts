@@ -85,6 +85,24 @@ describe('bookmark upsert payload parsing', () => {
     expectRejected({ ...validBody, icon_source: 'unknown_source' })
     expectRejected({ ...validBody, open_method: 4 })
     expectRejected({ ...validBody, open_method: 0 })
+    expectRejected({ ...validBody, is_recommended: 'yes' })
+  })
+
+  it('keeps is_recommended absent when omitted, boolean when provided', () => {
+    const omitted = parseBookmarkUpsertPayload({ category_id: 1, title: 'A', url: 'https://a.com' })
+    expect(omitted.ok && 'is_recommended' in omitted.value).toBe(false)
+
+    const recommended = parseBookmarkUpsertPayload({
+      ...validBody,
+      is_recommended: true,
+    })
+    expect(recommended.ok && recommended.value.is_recommended).toBe(true)
+
+    const notRecommended = parseBookmarkUpsertPayload({
+      ...validBody,
+      is_recommended: false,
+    })
+    expect(notRecommended.ok && notRecommended.value.is_recommended).toBe(false)
   })
 
   it('accepts every allowed enum value', () => {

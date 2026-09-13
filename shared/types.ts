@@ -27,6 +27,7 @@ export interface Bookmark {
   description_mode?: DescriptionDisplayMode | null
   open_method: 1 | 2 | 3 // 1=新窗口 2=当前页 3=当前页弹层
   is_private?: boolean | number // 公开书签为 0/false，私密书签为 1/true
+  is_recommended?: boolean | number // 推荐书签（首页卡片显示红色「推荐/推」角标）
   sort: number
   click_count?: number
   created_at: number
@@ -438,6 +439,7 @@ export interface BookmarkUpsertReq {
   description_mode?: DescriptionDisplayMode | null
   open_method?: 1 | 2 | 3
   is_private?: boolean
+  is_recommended?: boolean
 }
 
 // POST /api/browser-sync/bookmarks —— 浏览器扩展单向同步

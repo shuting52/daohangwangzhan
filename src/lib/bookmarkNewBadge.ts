@@ -1,6 +1,5 @@
 // “最新上新/NEW”徽标与“本地文件书签”识别。
 // 新增时间窗口内（默认 7 天）的书签视为上新；本地文件书签 URL 以 /api/file/ 开头。
-import type { Bookmark } from '../../shared/types'
 
 export const NEW_BADGE_DAYS = 7
 export const RECENT_NEW_DAYS = 7
@@ -17,7 +16,7 @@ export function isFileBookmarkUrl(url: string | undefined | null): boolean {
   return url.startsWith(FILE_BOOKMARK_URL_PREFIX)
 }
 
-export function isNewBookmark(bookmark: Pick<Bookmark, 'created_at' | 'url'>, now: number = Date.now()): boolean {
+export function isNewBookmark(bookmark: { created_at?: number; url: string | null | undefined }, now: number = Date.now()): boolean {
   // 本地文件书签不做“上新”徽标（上传行为本身足够显眼）。
   if (isFileBookmarkUrl(bookmark.url)) return false
   return isWithinNewWindow(bookmark.created_at, now)

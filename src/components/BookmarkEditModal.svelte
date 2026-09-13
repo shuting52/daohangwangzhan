@@ -352,6 +352,7 @@
           bind:url={form.url}
           bind:openMethod={form.open_method}
           bind:isPrivate={form.is_private}
+          bind:isRecommended={form.is_recommended}
           bind:description={form.description}
           bind:descriptionMode={form.description_mode}
           {categories}

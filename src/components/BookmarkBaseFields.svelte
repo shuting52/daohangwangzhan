@@ -9,6 +9,7 @@
   export let url = ''
   export let openMethod: BookmarkFormValue['open_method'] = 'new_tab'
   export let isPrivate = false
+  export let isRecommended = false
   export let description = ''
   export let descriptionMode: BookmarkFormValue['description_mode'] = 'inherit'
   export let categories: CategoryTreeOption[] = []
@@ -119,6 +120,15 @@
     <span>设为私密链接（仅登录可见）</span>
   </span>
   <small>开启后，未登录访客不会看到这个书签；管理员登录后仍可正常访问。</small>
+</label>
+
+<label class="field-compact privacy-field">
+  <span>首页角标</span>
+  <span class="checkbox-row">
+    <input bind:checked={isRecommended} type="checkbox" disabled={loading} />
+    <span>设为推荐（首页卡片显示红色「推荐/推」角标）</span>
+  </span>
+  <small>模仿导航站常见的“推荐”标识，桌面端显示「推荐」，移动端显示「推」。</small>
 </label>
 
 <label class="field-compact">

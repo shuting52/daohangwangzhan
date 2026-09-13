@@ -19,6 +19,7 @@
   export let hasCustomIconBackground = false
   export let preview = false
   export let themeOverride: 'light' | 'dark' | null = null
+  export let showNewBadge = false
   export let onLinkClick: ((event: MouseEvent) => AsyncVoid) | undefined = undefined
   export let onContextMenu: ((event: MouseEvent) => AsyncVoid) | undefined = undefined
   export let onIconError: (() => AsyncVoid) | undefined = undefined
@@ -64,8 +65,13 @@
   />
 
   <div class="bookmark-text">
-    <h3 class="bookmark-title">{bookmark.title}</h3>
-      {#if showDescription && descriptionMode === 'always' && bookmark.description}
+    <div class="bookmark-title-row">
+      <h3 class="bookmark-title">{bookmark.title}</h3>
+      {#if showNewBadge}
+        <span class="bookmark-new-badge" aria-hidden="true">NEW</span>
+      {/if}
+    </div>
+    {#if showDescription && descriptionMode === 'always' && bookmark.description}
       <p class="bookmark-description">{bookmark.description}</p>
     {/if}
   </div>

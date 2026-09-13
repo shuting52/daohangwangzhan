@@ -45,7 +45,8 @@ export function parseBookmarkUpsertPayload(body: BookmarkUpsertReq | null): Book
       body.icon_source !== null &&
       !ICON_SOURCES.includes(body.icon_source)) ||
     (body.open_method !== undefined && !OPEN_METHODS.includes(body.open_method)) ||
-    (body.is_private !== undefined && typeof body.is_private !== 'boolean')
+    (body.is_private !== undefined && typeof body.is_private !== 'boolean') ||
+    (body.is_recommended !== undefined && typeof body.is_recommended !== 'boolean')
   ) {
     return { ok: false, message: 'invalid bookmark payload' }
   }
@@ -73,6 +74,9 @@ export function parseBookmarkUpsertPayload(body: BookmarkUpsertReq | null): Book
       open_method: body.open_method,
       ...(Object.prototype.hasOwnProperty.call(body, 'is_private')
         ? { is_private: body.is_private === true }
+        : {}),
+      ...(Object.prototype.hasOwnProperty.call(body, 'is_recommended')
+        ? { is_recommended: body.is_recommended === true }
         : {}),
     },
   }

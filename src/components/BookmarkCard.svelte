@@ -59,8 +59,14 @@
   let iconStateKey = ''
   let windowListenersAttached = false
   let contextMenuInstanceId = Math.random().toString(36).slice(2)
+  let clickBubbleVisible = false
+  let clickBubbleStyle = ''
+  let clickBubbleTimer: ReturnType<typeof setTimeout> | null = null
 
   $: openInNewTab = bookmark.open_method === 1
+  $: isRecommended = bookmark.is_recommended === true || bookmark.is_recommended === 1
+  $: clickCount = typeof bookmark.click_count === 'number' ? bookmark.click_count : 0
+  $: showNewBadge = isNewBookmark({ created_at: bookmark.created_at, url: bookmark.url })
   $: iconBaseState = deriveBookmarkCardIconBase({
     bookmark,
     iconInView,
@@ -182,6 +188,30 @@
     contextMenuOpen = true
   }
 
+  function showClickBubble() {
+    if (sortMode || preview) return
+    if (clickBubbleTimer) {
+      clearTimeout(clickBubbleTimer)
+      clickBubbleTimer = null
+    }
+    if (!shellElement) return
+    const rect = shellElement.getBoundingClientRect()
+    const bubbleWidth = 140
+    const bubbleHeight = 30
+    let top = rect.top - bubbleHeight - 8
+    if (top < 4) top = rect.bottom + 8
+    let left = rect.left + rect.width / 2 - bubbleWidth / 2
+    left = Math.max(4, Math.min(left, window.innerWidth - bubbleWidth - 4))
+    clickBubbleStyle = `left: ${left}px; top: ${top}px;`
+    clickBubbleVisible = true
+  }
+
+  function hideClickBubble() {
+    clickBubbleTimer = window.setTimeout(() => {
+      clickBubbleVisible = false
+    }, 120)
+  }
+
   async function handleEditClick() {
     closeContextMenu()
     await onEdit?.(bookmark)
@@ -268,6 +298,10 @@
     disconnectIconObserver()
     resetLocalCachedIconUrl()
     syncWindowListeners(false)
+    if (clickBubbleTimer) {
+      clearTimeout(clickBubbleTimer)
+      clickBubbleTimer = null
+    }
   })
 </script>
 
@@ -278,7 +312,22 @@
   class:sort-mode={sortMode}
   style={cardShellStyle}
   bind:this={shellElement}
+  on:mouseenter={showClickBubble}
+  on:mouseleave={hideClickBubble}
 >
+  {#if isRecommended && !sortMode}
+    <span class="navcat-badge" aria-hidden="true">
+      <span class="badge-full">推荐</span><span class="badge-short">推</span>
+    </span>
+  {/if}
+
+  {#if clickBubbleVisible && !sortMode && !preview}
+    <span class="click-bubble" style={clickBubbleStyle} aria-hidden="true">
+      <svg class="click-bubble-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      今日点击 {clickCount} 次
+    </span>
+  {/if}
+
   {#if style === 'info'}
     <BookmarkCardInfo
       {bookmark}
@@ -315,6 +364,7 @@
       {hasCustomIconBackground}
       {preview}
       {themeOverride}
+      {showNewBadge}
       onLinkClick={handleLinkClick}
       onContextMenu={handleContextMenu}
       onIconError={handleIconError}
@@ -359,6 +409,95 @@
   @media (max-width: 500px) {
     .bookmark-card-shell.is-info {
       min-width: 0;
+    }
+  }
+
+  /* ===== 推荐/推 角标（灵感来自 daott.cn） ===== */
+  .navcat-badge {
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    z-index: 12;
+    transform: rotate(-15deg);
+    border-radius: 5px;
+    padding: 2px 6px;
+    font-size: 0.66rem;
+    font-weight: 800;
+    line-height: 1.4;
+    letter-spacing: 0.03em;
+    color: #fff;
+    background: linear-gradient(135deg, #ff4d4f 0%, #d9363e 100%);
+    box-shadow: 0 2px 8px rgba(217, 54, 62, 0.4);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .navcat-badge .badge-short {
+    display: none;
+  }
+
+  /* 窄屏/图标卡：只显示「推」省空间 */
+  @media (max-width: 640px) {
+    .navcat-badge .badge-full {
+      display: none;
+    }
+    .navcat-badge .badge-short {
+      display: inline;
+    }
+  }
+
+  :global([data-theme='dark']) .navcat-badge {
+    background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+    box-shadow: 0 2px 10px rgba(220, 38, 38, 0.5);
+  }
+
+  /* ===== 今日点击气泡 ===== */
+  .click-bubble {
+    position: fixed;
+    z-index: 9999;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: #fff;
+    background: rgba(15, 23, 42, 0.92);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+    pointer-events: none;
+    user-select: none;
+    animation: click-bubble-in 0.18s ease-out;
+  }
+
+  .click-bubble-icon {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 auto;
+    opacity: 0.85;
+  }
+
+  @keyframes click-bubble-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px) scale(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @media (hover: none) {
+    .click-bubble {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .click-bubble {
+      animation: none;
     }
   }
 

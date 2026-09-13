@@ -9,6 +9,7 @@
     type ChangePasswordReq,
     type ThemeMode,
   } from '../shared/types'
+  import ClickPoem from './components/ClickPoem.svelte'
   import ConfirmDialog from './components/ConfirmDialog.svelte'
   import Toast from './components/Toast.svelte'
   import Home from './views/Home.svelte'
@@ -982,6 +983,7 @@
   </div>
 {:else}
   <div class="app-shell" in:fade={{ duration: prefersReducedMotion ? 0 : 260, delay: prefersReducedMotion ? 0 : 60 }}>
+    <ClickPoem />
     <Toast />
     {#if rootError}
       <div class="app-alert">{rootError}</div>

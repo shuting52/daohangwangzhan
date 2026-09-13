@@ -17,6 +17,7 @@
   export let hasCustomIconBackground = false
   export let preview = false
   export let themeOverride: 'light' | 'dark' | null = null
+  export let showNewBadge = false
   export let onLinkClick: ((event: MouseEvent) => AsyncVoid) | undefined = undefined
   export let onContextMenu: ((event: MouseEvent) => AsyncVoid) | undefined = undefined
   export let onIconError: (() => AsyncVoid) | undefined = undefined
@@ -72,7 +73,10 @@
     on:click={handleLinkClick}
     on:contextmenu={handleContextMenu}
   >
-    {bookmark.title}
+    <span class="bookmark-icon-title-text">{bookmark.title}</span>
+    {#if showNewBadge}
+      <span class="bookmark-new-badge" aria-hidden="true">NEW</span>
+    {/if}
   </a>
 {/if}
 
@@ -128,7 +132,10 @@
   }
 
   .bookmark-icon-title {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     width: 100%;
     margin-top: 0.45rem;
     color: var(--card-title-color, var(--card-text-color, #0f172a));
@@ -137,9 +144,26 @@
     line-height: 1.25;
     text-align: center;
     text-decoration: none;
+  }
+
+  .bookmark-icon-title-text {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    min-width: 0;
+  }
+
+  .bookmark-icon-title .bookmark-new-badge {
+    flex: 0 0 auto;
+    padding: 0 5px;
+    border-radius: 999px;
+    font-size: 0.56rem;
+    font-weight: 800;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background: linear-gradient(135deg, #ff6b6b, #f43f5e);
+    box-shadow: 0 2px 6px rgba(244, 63, 94, 0.35);
   }
 
   .bookmark-card-icon.sort-mode {

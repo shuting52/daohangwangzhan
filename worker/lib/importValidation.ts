@@ -42,6 +42,7 @@ function isValidBookmark(value: unknown): value is Bookmark {
     value.url.trim().length > 0 &&
     (value.description_mode === null || value.description_mode === undefined || value.description_mode === 'always' || value.description_mode === 'hover' || value.description_mode === 'hidden') &&
     (value.is_private === undefined || value.is_private === true || value.is_private === false || value.is_private === 0 || value.is_private === 1)
+    && (value.is_recommended === undefined || value.is_recommended === true || value.is_recommended === false || value.is_recommended === 0 || value.is_recommended === 1)
   )
 }
 
